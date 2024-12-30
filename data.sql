@@ -1,97 +1,155 @@
--- sample INSERT statments for abc fund schema
 
-use fundOVerview;
+use fundOverview;
 
-INSERT INTO Customers (bank_id, agent_id, pnote_id, cFirst_name, cLast_name, dob, NRIC, gender, addr_1, addr_2, zipcode, cEmail, bank_num)
+INSERT INTO Customers (
+    cFirst_name, cLast_name, dob, NRIC, gender, addr_1, addr_2, zipcode, cEmail
+)
 VALUES
-    (1, 1, 1, 'Alice', 'Smith', '1990-01-15', 'S1234567A', 'F', '123 Elm St', 'Apt 101', '90210', 'alice.smith@example.com', 123456),
-    (2, 2, 2, 'Bob', 'Johnson', '1985-06-25', 'T2345678B', 'M', '456 Maple Ave', 'Unit 204', '10001', 'bob.johnson@example.com', 234567),
-    (3, 3, 3, 'Charlie', 'Brown', '1992-03-12', 'U3456789C', 'M', '789 Oak Rd', 'Suite 3A', '30303', 'charlie.brown@example.com', 345678),
-    (4, 1, 4, 'Daisy', 'Taylor', '1980-08-19', 'V4567890D', 'F', '321 Pine Ln', 'Floor 2', '60606', 'daisy.taylor@example.com', 456789),
-    (5, 2, 5, 'Ethan', 'Anderson', '1995-11-23', 'W5678901E', 'M', '654 Cedar Blvd', 'Office 5C', '77001', 'ethan.anderson@example.com', 567890),
-    (1, 3, 6, 'Fiona', 'Clark', '1990-02-14', 'X6789012F', 'F', '123 Birch St', 'Apt 302', '10101', 'fiona.clark@example.com', 678901),
-    (2, 1, 7, 'George', 'Miller', '1988-05-05', 'Y7890123G', 'M', '456 Aspen Way', 'Unit 7B', '60607', 'george.miller@example.com', 789012),
-    (3, 2, 8, 'Hannah', 'Davis', '1993-07-09', 'Z8901234H', 'F', '789 Spruce Ln', 'Suite 101', '77002', 'hannah.davis@example.com', 890123),
-    (4, 3, 9, 'Ian', 'Wilson', '1991-10-20', 'A9012345I', 'M', '321 Poplar Rd', 'Floor 4', '90211', 'ian.wilson@example.com', 901234),
-    (5, 1, 10, 'Jade', 'Moore', '1987-12-15', 'B0123456J', 'F', '654 Walnut St', 'Office 12', '10002', 'jade.moore@example.com', 123012),
-    (1, 2, 11, 'Kevin', 'Taylor', '1994-01-17', 'C1234567K', 'M', '123 Sycamore Rd', 'Apt 8C', '60608', 'kevin.taylor@example.com', 234123),
-    (2, 3, 12, 'Laura', 'Harris', '1989-03-22', 'D2345678L', 'F', '456 Alder Way', 'Unit 305', '30304', 'laura.harris@example.com', 345234),
-    (3, 1, 13, 'Mike', 'Adams', '1992-06-18', 'E3456789M', 'M', '789 Willow Ln', 'Suite 3C', '77003', 'mike.adams@example.com', 456345),
-    (4, 2, 14, 'Nina', 'Scott', '1986-09-30', 'F4567890N', 'F', '321 Fir St', 'Floor 5', '90212', 'nina.scott@example.com', 567456),
-    (5, 3, 15, 'Oliver', 'Evans', '1990-12-11', 'G5678901O', 'M', '654 Redwood Rd', 'Office 11', '10003', 'oliver.evans@example.com', 678567),
-    (1, 1, 16, 'Paula', 'King', '1985-04-27', 'H6789012P', 'F', '123 Beech Ln', 'Apt 4B', '60609', 'paula.king@example.com', 789678),
-    (2, 2, 17, 'Quincy', 'Wright', '1993-08-14', 'I7890123Q', 'M', '456 Chestnut Blvd', 'Unit 6C', '30305', 'quincy.wright@example.com', 890789),
-    (3, 3, 18, 'Rachel', 'Walker', '1994-11-07', 'J8901234R', 'F', '789 Elmwood Dr', 'Suite 5A', '77004', 'rachel.walker@example.com', 901890),
-    (4, 1, 19, 'Sam', 'Hall', '1987-02-19', 'K9012345S', 'M', '321 Dogwood St', 'Floor 1', '90213', 'sam.hall@example.com', 123901),
-    (5, 2, 20, 'Tina', 'Young', '1991-05-12', 'L0123456T', 'F', '654 Juniper Ln', 'Office 9', '10004', 'tina.young@example.com', 234012),
-    (1, 3, 21, 'Uma', 'Allen', '1995-09-05', 'M1234567U', 'F', '123 Magnolia Rd', 'Apt 7A', '60610', 'uma.allen@example.com', 345123),
-    (2, 1, 22, 'Victor', 'Perez', '1989-12-29', 'N2345678V', 'M', '456 Maplewood Ave', 'Unit 202', '30306', 'victor.perez@example.com', 456234),
-    (3, 2, 23, 'Wendy', 'Clarkson', '1993-03-08', 'O3456789W', 'F', '789 River Rd', 'Suite 6C', '77005', 'wendy.clarkson@example.com', 567345),
-    (4, 3, 24, 'Xavier', 'Bell', '1990-06-17', 'P4567890X', 'M', '321 Highland Blvd', 'Floor 3', '90214', 'xavier.bell@example.com', 678456);
+-- Row 1 to 30
+('John', 'Doe', '1990-01-01', 'S1234567A', 'M', '123 Street A', 'Suite 1', '12345', 'johndoe@example.com'),
+('Jane', 'Smith', '1985-05-15', 'T9876543B', 'F', '456 Street B', 'Suite 2', '54321', 'janesmith@example.com'),
+('Alice', 'Brown', '1992-03-10', 'S8765432C', 'F', '789 Street C', 'Suite 3', '67890', 'alicebrown@example.com'),
+('Bob', 'White', '1988-08-20', 'T7654321D', 'M', '101 Street D', 'Suite 4', '98765', 'bobwhite@example.com'),
+('Charlie', 'Green', '1995-12-25', 'S6543210E', 'M', '202 Street E', 'Suite 5', '13579', 'charliegreen@example.com'),
+('Emily', 'Black', '1993-04-08', 'T5432109F', 'F', '303 Street F', 'Suite 6', '97531', 'emilyblack@example.com'),
+('David', 'Gray', '1987-11-13', 'S4321098G', 'M', '404 Street G', 'Suite 7', '24680', 'davidgray@example.com'),
+('Sophia', 'Lee', '1991-06-30', 'T3210987H', 'F', '505 Street H', 'Suite 8', '86420', 'sophialee@example.com'),
+('Oliver', 'Clark', '1983-09-12', 'S2109876I', 'M', '606 Street I', 'Suite 9', '75319', 'oliverclark@example.com'),
+('Liam', 'Hill', '1994-07-22', 'T1098765J', 'M', '707 Street J', 'Suite 10', '95137', 'liamhill@example.com'),
+('Mia', 'Adams', '1986-02-14', 'S9876543K', 'F', '808 Street K', 'Suite 11', '13597', 'miaadams@example.com'),
+('Noah', 'Evans', '1999-10-01', 'T8765432L', 'M', '909 Street L', 'Suite 12', '75318', 'noahevans@example.com'),
+('Emma', 'Baker', '1984-03-18', 'S7654321M', 'F', '1010 Street M', 'Suite 13', '86410', 'emmabaker@example.com'),
+('James', 'Martin', '1996-08-28', 'T6543210N', 'M', '1111 Street N', 'Suite 14', '42086', 'jamesmartin@example.com'),
+('Ava', 'Carter', '1997-12-05', 'S5432109O', 'F', '1212 Street O', 'Suite 15', '68024', 'avacarter@example.com'),
+('Ethan', 'Moore', '1993-01-17', 'T4321098P', 'M', '1313 Street P', 'Suite 16', '80246', 'ethanmoore@example.com'),
+('Isabella', 'Young', '1989-05-19', 'S3210987Q', 'F', '1414 Street Q', 'Suite 17', '62480', 'isabellayoung@example.com'),
+('Logan', 'King', '1998-04-25', 'T2109876R', 'M', '1515 Street R', 'Suite 18', '31042', 'loganking@example.com'),
+('Ella', 'Wright', '1990-06-08', 'S1098765S', 'F', '1616 Street S', 'Suite 19', '53719', 'ellawright@example.com'),
+( 'Henry', 'Scott', '1992-07-11', 'T0987654T', 'M', '1717 Street T', 'Suite 20', '19273', 'henryscott@example.com'),
+('Sofia', 'Harris', '1985-11-07', 'S9876543U', 'F', '1818 Street U', 'Suite 21', '48209', 'sofiaharris@example.com'),
+( 'Mason', 'Cooper', '1991-02-24', 'T8765432V', 'M', '1919 Street V', 'Suite 22', '80268', 'masoncooper@example.com'),
+('Aria', 'Ward', '1994-09-06', 'S7654321W', 'F', '2020 Street W', 'Suite 23', '59731', 'ariaward@example.com'),
+('Lucas', 'Perez', '1987-10-03', 'T6543210X', 'M', '2121 Street X', 'Suite 24', '18349', 'lucasperez@example.com'),
+('Grace', 'Diaz', '1995-03-15', 'S5432109Y', 'F', '2222 Street Y', 'Suite 25', '75381', 'gracediaz@example.com'),
+('Benjamin', 'Gomez', '1986-12-20', 'T4321098Z', 'M', '2323 Street Z', 'Suite 26', '14689', 'benjamingomez@example.com'),
+('Harper', 'Reed', '1990-01-05', 'S3210987A', 'F', '2424 Street A', 'Suite 27', '29573', 'harperreed@example.com'),
+('Daniel', 'Stewart', '1988-05-30', 'T2109876B', 'M', '2525 Street B', 'Suite 28', '76438', 'danielstewart@example.com'),
+('Lily', 'Rogers', '1993-08-19', 'S1098765C', 'F', '2626 Street C', 'Suite 29', '20479', 'lilyrogers@example.com'),
+('Alexander', 'Morgan', '1984-11-27', 'T0987654D', 'M', '2727 Street D', 'Suite 30', '38592', 'alexandermorgan@example.com');
+
 
 INSERT INTO Agents (aFirst_name, aLast_name, aEmail, join_date)
 VALUES
-    ('John', 'Doe', 'john.doe@example.com', '2021-05-15 09:00:00'),
-    ('Jane', 'Smith', 'jane.smith@example.com', '2020-08-01 10:30:00'),
-    ('Emily', 'Taylor', 'emily.taylor@example.com', '2019-11-20 14:45:00');
+('Alice', 'Johnson', 'alice.johnson@example.com', '2018-06-01'),
+('Bob', 'Smith', 'bob.smith@example.com', '2017-03-15'),
+('Catherine', 'Brown', 'catherine.brown@example.com', '2019-08-20'),
+('David', 'Lee', 'david.lee@example.com', '2020-01-10'),
+('Emma', 'Davis', 'emma.davis@example.com', '2016-12-05'),
+('Frank', 'Taylor', 'frank.taylor@example.com', '2021-07-22'),
+('Grace', 'Harris', 'grace.harris@example.com', '2022-04-18'),
+('Henry', 'Wilson', 'henry.wilson@example.com', '2023-02-25');
 
-INSERT INTO Banks (bank_name, addr_1, addr_2, zipcode, swift_code)
-VALUES
-    ('National Trust Bank', '123 Elm Street', 'Suite 400', '90210', 'NATRUS33XXX'),
-    ('Global Finance Bank', '456 Maple Avenue', 'Floor 2', '10001', 'GLOBUS22XXX'),
-    ('Pioneer Savings', '789 Oak Road', 'Building A', '30303', 'PIOSUS44XXX'),
-    ('Unity Federal Bank', '321 Pine Lane', 'Apt 5B', '60606', 'UNIFUS55XXX'),
-    ('Capital Growth Bank', '654 Cedar Blvd', 'Office 10', '77001', 'CAPGUS66XXX');
 
-INSERT INTO Pnotes (cust_id, insert_date, invest_amt, maintenance_fee)
+INSERT INTO Banks (bank_name, bank_num, addr_1, addr_2, zipcode, swift_code)
 VALUES
-    (1, '2022-01-05', 200000, 0.02),
-    (2, '2022-02-10', 450000, 0.02),
-    (3, '2022-03-15', 750000, 0.02),
-    (4, '2022-04-20', 200000, 0.02),
-    (5, '2022-05-25', 450000, 0.02),
-    (6, '2022-06-30', 750000, 0.02),
-    (7, '2022-07-10', 200000, 0.02),
-    (8, '2022-08-15', 450000, 0.02),
-    (9, '2022-09-05', 750000, 0.02),
-    (10, '2022-10-20', 200000, 0.02),
-    (11, '2022-11-30', 450000, 0.02),
-    (12, '2022-12-10', 750000, 0.02),
-    (13, '2022-01-25', 200000, 0.02),
-    (14, '2022-02-05', 450000, 0.02),
-    (15, '2022-03-10', 750000, 0.02),
-    (16, '2022-04-15', 200000, 0.02),
-    (17, '2022-05-05', 450000, 0.02),
-    (18, '2022-06-25', 750000, 0.02),
-    (19, '2022-07-15', 200000, 0.02),
-    (20, '2022-08-30', 450000, 0.02),
-    (21, '2022-09-10', 750000, 0.02),
-    (22, '2022-10-05', 200000, 0.02),
-    (23, '2022-11-25', 450000, 0.02),
-    (24, '2022-12-20', 750000, 0.02);
+('National Bank', 12345678, '123 Elm Street', 'Suite 101', '10001', 'NATBANK123'),
+('Citywide Bank', 23456789, '456 Oak Avenue', 'Floor 2', '20002', 'CITYBANK456'),
+('Global Trust', 34567890, '789 Pine Blvd', 'Building 3', '30003', 'GLOBTRUST789'),
+('Metro Savings', 45678901, '321 Maple Drive', 'Apt 12B', '40004', 'METROSAV456'),
+('Pioneer Credit', 56789012, '654 Cedar Lane', 'Office 5', '50005', 'PIONCRED789');
+
+
+INSERT INTO Pnotes (cust_id, bank_id, divi_id, pstart_date, invest_amt)
+VALUES
+(1, 1, 1, '2022-01-31', 250000.00),
+(2, 2, 1, '2022-02-28', 500000.00),
+(3, 3, 1, '2022-03-31', 750000.00),
+(4, 4, 1, '2022-04-30', 250000.00),
+(5, 5, 1, '2022-05-31', 500000.00),
+(6, 1, 1, '2022-06-30', 750000.00),
+(7, 2, 1, '2022-07-31', 250000.00),
+(8, 3, 1, '2022-08-31', 500000.00),
+(9, 4, 1, '2022-09-30', 750000.00),
+(10, 5, 1, '2022-10-31', 250000.00),
+(11, 1, 1, '2022-11-30', 500000.00),
+(12, 2, 1, '2022-12-31', 750000.00),
+(13, 3, 1, '2023-01-31', 250000.00),
+(14, 4, 1, '2023-02-28', 500000.00),
+(15, 5, 1, '2023-03-31', 750000.00),
+(16, 1, 1, '2023-04-30', 250000.00),
+(17, 2, 1, '2023-05-31', 500000.00),
+(18, 3, 1, '2023-06-30', 750000.00),
+(19, 4, 1, '2023-07-31', 250000.00),
+(20, 5, 1, '2023-08-31', 500000.00),
+(21, 1, 1, '2023-09-30', 750000.00),
+(22, 2, 1, '2023-10-31', 250000.00),
+(23, 3, 1, '2023-11-30', 500000.00),
+(24, 4, 1, '2023-12-31', 750000.00),
+(25, 5, 1, '2024-01-31', 250000.00),
+(26, 1, 1, '2024-02-28', 500000.00),
+(27, 2, 1, '2024-03-31', 750000.00),
+(28, 3, 1, '2024-04-30', 250000.00),
+(29, 4, 1, '2024-05-31', 500000.00),
+(30, 5, 1, '2024-06-30', 750000.00);
+
 
 
 INSERT INTO Dividends (payout_date, nav_payout)
 VALUES
-    ('2021-03-01 00:00:00', ROUND(3 + RAND() * (5 - 3), 3)),
-    ('2021-06-01 00:00:00', ROUND(3 + RAND() * (5 - 3), 3)),
-    ('2021-09-01 00:00:00', ROUND(3 + RAND() * (5 - 3), 3)),
-    ('2021-12-01 00:00:00', ROUND(3 + RAND() * (5 - 3), 3)),
-    ('2022-03-01 00:00:00', ROUND(3 + RAND() * (5 - 3), 3)),
-    ('2022-06-01 00:00:00', ROUND(3 + RAND() * (5 - 3), 3)),
-    ('2022-09-01 00:00:00', ROUND(3 + RAND() * (5 - 3), 3)),
-    ('2022-12-01 00:00:00', ROUND(3 + RAND() * (5 - 3), 3)),
-    ('2023-03-01 00:00:00', ROUND(3 + RAND() * (5 - 3), 3)),
-    ('2023-06-01 00:00:00', ROUND(3 + RAND() * (5 - 3), 3)),
-    ('2023-09-01 00:00:00', ROUND(3 + RAND() * (5 - 3), 3)),
-    ('2023-12-01 00:00:00', ROUND(3 + RAND() * (5 - 3), 3));
+('2022-02-28', 1.25),
+('2022-03-31', 1.25),
+('2022-04-30', 1.25),
+('2022-05-31', 1.25),
+('2022-06-30', 1.25),
+('2022-07-31', 1.25),
+('2022-08-31', 1.25),
+('2022-09-30', 1.25),
+('2022-10-31', 1.25),
+('2022-11-30', 1.25),
+('2022-12-31', 1.25),
+('2023-01-31', 1.25),
+('2023-02-28', 1.25),
+('2023-03-31', 1.25),
+('2023-04-30', 1.25),
+('2023-05-31', 1.25),
+('2023-06-30', 1.25),
+('2023-07-31', 1.25),
+('2023-08-31', 1.25),
+('2023-09-30', 1.25),
+('2023-10-31', 1.25),
+('2023-11-30', 1.25),
+('2023-12-31', 1.25);
 
 
-INSERT INTO Commissions (comms_desc, comms_payout)
-VALUES 
-    ('More than 0 and less than 99,999', 0.005),
-    ('More than 100,000 and less than 199,999', 0.01),
-    ('More than 200,000 and less than 399,999', 0.02),
-    ('More than 400,000 and less than 599,999', 0.03),
-    ('More than 600,000 and less than 799,999', 0.04),
-    ('More than 800,000', 0.05);
+INSERT INTO MonthlyComms (pnote_id, agent_id, comms_base)
+VALUES
+(31, 1, 1),
+(32, 2, 1),
+(33, 3, 1),
+(34, 4, 1),
+(35, 5, 1),
+(36, 6, 1),
+(37, 7, 1),
+(38, 8, 1),
+(39, 1, 1),
+(40, 2, 1),
+(41, 3, 1),
+(42, 4, 1),
+(43, 5, 1),
+(44, 6, 1),
+(45, 7, 1),
+(46, 8, 1),
+(47, 1, 1),
+(48, 2, 1),
+(49, 3, 1),
+(50, 4, 1),
+(51, 5, 1),
+(52, 6, 1),
+(53, 7, 1),
+(54, 8, 1),
+(55, 1, 1),
+(56, 2, 1),
+(57, 3, 1),
+(58, 4, 1),
+(59, 5, 1),
+(60, 6, 1);

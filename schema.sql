@@ -1,86 +1,71 @@
-SQL schema for ABC fund
 
-create database fundOverview;
+CREATE DATABASE fundOverview;
 
 USE fundOverview;
 
 --Creating customer table
 create table Customers (
-    cust_id INT AUTO_INCREAMENT PRIMARY KEY,
-    bank_id INT,
-    agent_id INT,
-    pnote_id INT,
+    cust_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+    maintenance_fee DECIMAL(10,2) NOT NULL,
     cFirst_name VARCHAR(255) NOT NULL,
     cLast_name VARCHAR(255) NOT NULL,
     dob DATETIME NOT NULL,
     NRIC VARCHAR(16) NOT NULL,
-    gender CHAR NOT NULL
+    gender CHAR NOT NULL,
     addr_1 VARCHAR(45) NOT NULL,
     addr_2 VARCHAR(45) NOT NULL,
     zipcode VARCHAR(10) NOT NULL,
-    cEmail VARCHAR(100) NOT NULL,
-    bank_num INT NOT NULL,
-    FOREIGN KEY (bank_id) REFERENCES Banks(bank_id),
-    FOREIGN KEY (agent_id) REFERENCES Agents(agent_id),
-    FOREIGN KEY (pnote_id) REFERENCES Pnotes(pnote_id)
-)
+    cEmail VARCHAR(100) NOT NULL
+);
 
 CREATE TABLE Agents(
-    agent_id INT AUTO_INCREAMENT PRIMARY KEY,
-    pnote_id INT,
+    agent_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
     aFirst_name VARCHAR(255) NOT NULL,
     aLast_name VARCHAR(255) NOT NULL,
     aEmail VARCHAR(100) NOT NULL,
-    join_date DATETIME NOT NULL,
-    FOREIGN KEY (pnote_id) REFERENCES Pnotes(pnote_id)
-)
+    join_date DATETIME NOT NULL
+);
 
 CREATE TABLE Banks(
-    bank_id INT AUTO_INCREAMENT PRIMARY KEY,
+    bank_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
     bank_name VARCHAR(255) NOT NULL, 
+    bank_num INT NOT NULL,
     addr_1 VARCHAR(45) NOT NULL,
     addr_2 VARCHAR(45) NOT NULL,
     zipcode VARCHAR(10) NOT NULL,
-    swift_code VARCHAR(16) NOT NULL,
-)
+    swift_code VARCHAR(16) NOT NULL
+);
 
 CREATE TABLE Pnotes(
-    pnote_id INT AUTO_INCREAMENT PRIMARY KEY,
-    cust_id INT,
-    insert_date DATETIME NOT NULL,
-    end_date DATETIME,
-    invest_amt DECIMAL(10,2) NOT NULL,
-    maintenance_fee DECIMAL(10,2) NOT NULL,
-    FOREIGN KEY (cust_id) REFERENCES Customers(cust_id)
-)
-
-CREATE TABLE QuartDiv(
-    qd_id INT AUTO_INCREAMENT PRIMARY KEY,
-    pnote_id INT,
-    divi_id INT,
-    FOREIGN KEY (pnote_id) REFERENCES Customers(pnote_id),
-    FOREIGN KEY (divi_id) REFERENCES Dividends(divi_id)
-)
+    pnote_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+    pstart_date DATETIME NOT NULL,
+    pend_date DATETIME,
+    invest_amt DECIMAL(10,2) NOT NULL
+);
 
 CREATE TABLE Dividends(
-    divi_id INT AUTO_INCREAMENT PRIMARY KEY,
-    payout_date DATETIME;
+    divi_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+    payout_date DATETIME,
     nav_payout DECIMAL(10,2) NOT NULL
-)
+);
 
 CREATE TABLE MonthlyComms(
-    moncomms_id INT AUTO_INCREAMENT PRIMARY KEY,
-    agent_id INT,
-    pnote_id INT,
-    comms_id,
-    FOREIGN KEY (agent_id) REFERENCES Agents(agent_id),
-    FOREIGN KEY (pnote_id) REFERENCES Pnotes(pnote_id),
-    FOREIGN KEY (comms_id) REFERENCES Commissions(comms_id)
+    moncomms_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+    comms_base DECIMAL (10,2) NOT NULL
+);
 
-)
+alter table Customers ADD Column pnote_id int UNSIGNED;
+alter table Customers add constraint fk_customer_pnote FOREIGN KEY (pnote_id) REFERENCES Pnotes(pnote_id);
 
-CREATE TABLE Commissions(
-    comms_id INT AUTO_INCREAMENT PRIMARY KEY,
-    comms_desc VARCHAR(25) NOT NULL;
-    comms_payout DECIMAL(10,2) NOT NULL
-)
+
+alter table Pnotes add column cust_id INT UNSIGNED; 
+alter table Pnotes add column bank_id INT UNSIGNED;
+alter table Pnotes add column divi_id int UNSIGNED;
+alter table Pnotes add constraint fk_pnote_customer FOREIGN KEY(cust_id) REFERENCES Customers(cust_id);
+alter table Pnotes add constraint fk_pnote_bank FOREIGN KEY (bank_id) REFERENCES Banks(bank_id);
+alter table Pnotes add constraint fk_pnote_dividend FOREIGN KEY(divi_id)REFERENCES Dividends(divi_id);
+
+alter table MonthlyComms add column pnote_id INT UNSIGNED;
+alter table MonthlyComms add column agent_id INT UNSIGNED;
+alter table MonthlyComms add constraint fk_monthlycomms_pnote FOREIGN KEY(pnote_id) REFERENCES Pnotes(pnote_id);
+alter table MonthlyComms add constraint fk_monthlycomms_agent FOREIGN KEY (agent_id) REFERENCES Agents(agent_id);
