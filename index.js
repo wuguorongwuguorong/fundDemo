@@ -29,21 +29,44 @@ async function main() {
         'password': process.env.DB_PASSWORD
     })
 
-    app.get('/', async function (req, res) {
-        res.render('index.hbs');
+    // app.get('/', async function (req, res) {
+    //     res.render('customers.hbs');
 
-    });
+    // });
 
     app.get('/customers', async function (req, res) {
-        let [customers] = await connection.execute('SELECT * FROM Customers Inner JOIN Pnotes ON Customers.cust_id = Pnotes.cust_id');
+        let query = `SELECT * FROM Customers JOIN Pnotes ON Pnotes.cust_id = Customers.cust_id WHERE 1=1 `;
 
+        const bindings = [];
+
+        // extract search terms
+        const { cFirst_name, cLast_name } = req.query;
+        if (cFirst_name) {
+            query += ` AND cFirst_name LIKE ?`;
+            bindings.push('%' + cFirst_name + '%')
+        }
+        if (cLast_name) {
+            query += ` AND cLast_name LIKE ?`;
+            bindings.push('%' + cLast_name + '%');
+        }
+
+        console.log("query", query);
+
+       
         // const [customers] = await connection.execute({
         //     'sql': query,
         //     'nestTables': true
         // }, bindings);
+        
 
-        res.render('customers', {
+        const [customers] = await connection.execute(query,bindings);
+
+        //let [customers] = await connection.execute('SELECT * FROM Customers Inner JOIN Pnotes ON Customers.cust_id = Pnotes.cust_id');
+
+
+        res.render('customers.hbs', {
             "allCustomers": customers,
+            "searchTerms": req.query
         })
     })
 
