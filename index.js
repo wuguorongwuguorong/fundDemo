@@ -70,6 +70,63 @@ async function main() {
         })
     })
 
+    app.get('/customers', async function (req, res) {
+        const [customers] = await connection.execute("SELECT * FROM Customers")
+        console.log(customers);
+        res.render('customers', {
+            "allCustomers": customers,
+            
+        });
+    })
+    //add new customers into database and display in a new page
+    app.get('/customers/create', async function (req, res) {
+        const [customers] = await connection.execute("SELECT * FROM Customers")
+        console.log(customers);
+        res.render('create_customers', {
+            "allCustomers": customers,
+            
+        });
+    })
+    //add new customers into database and display
+    app.post('/customers/create', async function (req, res) {
+        const { cFirst_name, cLast_name, dob, NRIC, gender, addr_1, addr_2, zipcode, cEmail} = req.body;
+        const query = "INSERT INTO Customers(cFirst_name, cLast_name, dob, NRIC, gender, addr_1, addr_2, zipcode, cEmail) VALUES (? ,?, ?,?,?,?,?,?,?);"
+        const results = await connection.execute(query, [cFirst_name, cLast_name, dob, NRIC, gender, addr_1, addr_2, zipcode, cEmail]);
+        //res.send(results)
+        res.redirect('/customers');
+    })
+
+     //delete of customers
+     app.get('/customers/:customer_id/delete', async function (req, res) {
+        try{
+             const customer_id = req.params.customer_id;
+         
+            const [customers] = await connection.execute("SELECT * FROM Customers WHERE cust_id = ?",
+                [customer_id]);
+            const customerToDelete = customers[0];
+            res.render("delete_customers", {
+                'customer': customerToDelete    
+            })
+        }catch(e){
+            res.json(404)
+        }  
+    })
+    app.post('/customers/:customer_id/delete', async function(req,res){
+        try{
+          const query = "DELETE FROM Customers where cust_id=?";
+          await connection.execute(query,[req.params.customer_id]);
+        //  res.render('successful_message',{
+        //    'happyMessage': 'customer deleted successfully'
+        //})
+            res.redirect('/customers');
+        }catch(e){
+            res.render('error',{
+                'errorMessage': 'Unable to delete customer'
+            })
+        }
+    })
+   
+
 }
 main();
 

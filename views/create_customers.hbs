@@ -1,0 +1,50 @@
+
+{{#extends "base"}}
+
+{{#block "content"}}
+<h1>Create Customer</h1>
+<form method="POST">
+    <div>
+        <label>First Name</label>
+        <input type="text" name="cFirst_name" class="form-control" />
+    </div>
+    <div>
+        <label>Last Name</label>
+        <input type="text" name="cLast_name" class="form-control" />
+    </div>
+    <div>
+        <label>Date Of Birth</label>
+        <input type="text" name="dob" class="form-control" />
+    </div>
+     <div>
+        <label>NRIC</label>
+        <input type="text" name="NRIC" class="form-control" />
+    </div>
+     <div>
+        <label>Gender</label>
+        <input type="text" name="gender" class="form-control" />
+    </div>
+     <div>
+        <label>Address 2</label>
+        <input type="text" name="addr_1" class="form-control" />
+    </div>
+     <div>
+        <label>Address 2</label>
+        <input type="text" name="addr_2" class="form-control" />
+    </div>
+     <div>
+        <label>Zipcode</label>
+        <input type="text" name="zipcode" class="form-control" />
+    </div>
+     <div>
+        <label>Email</label>
+        <input type="text" name="cEmail" class="form-control" />
+    </div>
+
+    {{!-- <button type="submit">Create</button> --}}
+    <input type="submit" value="Create" class="btn btn-primary mt-3" />
+</form>
+
+{{/block}}
+
+{{/extends}}
