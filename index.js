@@ -29,10 +29,10 @@ async function main() {
         'password': process.env.DB_PASSWORD
     })
 
-    // app.get('/', async function (req, res) {
-    //     res.render('customers.hbs');
+    app.get('/', async function (req, res) {
+        res.render('/overview');
 
-    // });
+    });
 
     app.get('/overview', async function (req, res) {
         let query = `SELECT Customers.cFirst_name, Customers.cLast_name, Customers.cEmail, Banks.bank_name, Pnotes.invest_amt, Pnotes.pstart_date, Agents.aFirst_name, Agents.aLast_name FROM Customers JOIN Pnotes ON Pnotes.cust_id = Customers.cust_id Join Agents ON Pnotes.agent_id = Agents.agent_id join Banks on Pnotes.bank_id = Banks.bank_id WHERE 1=1 `;
@@ -107,6 +107,7 @@ async function main() {
             res.render("delete_customers", {
                 'customer': customerToDelete    
             })
+            
         }catch(e){
             res.json(404)
         }  
