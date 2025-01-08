@@ -34,8 +34,8 @@ async function main() {
 
     // });
 
-    app.get('/customers', async function (req, res) {
-        let query = `SELECT * FROM Customers JOIN Pnotes ON Pnotes.cust_id = Customers.cust_id WHERE 1=1 `;
+    app.get('/overview', async function (req, res) {
+        let query = `SELECT Customers.cFirst_name, Customers.cLast_name, Customers.cEmail, Banks.bank_name, Pnotes.invest_amt, Pnotes.pstart_date, Agents.aFirst_name, Agents.aLast_name FROM Customers JOIN Pnotes ON Pnotes.cust_id = Customers.cust_id Join Agents ON Pnotes.agent_id = Agents.agent_id join Banks on Pnotes.bank_id = Banks.bank_id WHERE 1=1 `;
 
         const bindings = [];
 
@@ -64,7 +64,7 @@ async function main() {
         //let [customers] = await connection.execute('SELECT * FROM Customers Inner JOIN Pnotes ON Customers.cust_id = Pnotes.cust_id');
 
 
-        res.render('customers.hbs', {
+        res.render('overallView', {
             "allCustomers": customers,
             "searchTerms": req.query
         })
