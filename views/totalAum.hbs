@@ -1,0 +1,22 @@
+{{#extends "base"}}
+{{#block "content"}}
+
+<h2 class="mt-3">Total Fund</h2>
+
+<table class="table">
+    <tr>
+        <th>Total Invested Amount </th>
+        <th>Total Customers</th>
+
+    </tr>
+
+    <tr>
+           <td>{{totalSum.Total_Invested_Amount}}</td>
+        <td>{{totalSum.Unique_Customers}}</td>
+    </tr>
+
+</table>
+
+
+{{/block}}
+{{/extends}}

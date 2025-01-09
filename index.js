@@ -30,11 +30,11 @@ async function main() {
     })
 
     app.get('/', async function (req, res) {
-        res.render('overallView');
+        res.render('index');
 
     });
 
-    app.get('/overview', async function (req, res) {
+    app.get('/overallView', async function (req, res) {
         let query = `SELECT Customers.cFirst_name, Customers.cLast_name, Customers.cEmail, Banks.bank_name, Pnotes.invest_amt, Pnotes.pstart_date, Agents.aFirst_name, Agents.aLast_name FROM Customers JOIN Pnotes ON Pnotes.cust_id = Customers.cust_id Join Agents ON Pnotes.agent_id = Agents.agent_id join Banks on Pnotes.bank_id = Banks.bank_id WHERE 1=1 `;
 
         const bindings = [];
@@ -154,7 +154,15 @@ async function main() {
                 'errorMessage': "Unable to edit customer"
             })
         }
+    })
 
+    //show total AUM and total unique customers
+    app.get('/totalAum', async function (req, res) {
+        const [total] = await connection.execute("SELECT SUM(p.invest_amt) AS Total_Invested_Amount,COUNT(DISTINCT c.cust_id) AS Unique_Customers FROM Customers c JOIN Pnotes p ON c.cust_id = p.cust_id;")
+        console.log(total);
+        res.render('totalAum', {
+            "totalSum": total[0],    
+        });
     })
 
 }
