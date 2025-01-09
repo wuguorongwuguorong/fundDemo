@@ -30,7 +30,7 @@ async function main() {
     })
 
     app.get('/', async function (req, res) {
-        res.render('/overview');
+        res.render('overallView');
 
     });
 
@@ -127,6 +127,35 @@ async function main() {
         }
     })
    
+    //update customers page
+    app.get('/customers/:customer_id/update', async function (req, res) {
+        const customer_id = req.params.customer_id;
+        const [customers] = await connection.execute("SELECT * FROM Customers WHERE cust_id = ?",
+            [customer_id])
+        const customer = customers[0];
+        res.render('edit_customers', {
+            customer,
+        
+        })
+    })
+
+    app.post('/customers/:customer_id/update', async function (req, res) {
+        try {
+            const { cFirst_name, cLast_name, dob, NRIC, gender, addr_1, addr_2, zipcode, cEmail } = req.body;
+            const query = `UPDATE Customers SET cFirst_name= ? , cLast_name = ?, dob =?,NRIC =?,gender =?,addr_1 =?,addr_2 =?,zipcode =?,cEmail =? WHERE cust_id =?`;
+            const bindings = [cFirst_name, cLast_name, dob, NRIC, gender, addr_1, addr_2, zipcode, cEmail, req.params.customer_id];
+            await connection.execute(query, bindings);
+            console.log('Request Body:', req.body);
+            console.log('Customer ID:', req.params.customer_id);
+
+            res.redirect('/customers');
+        } catch (e) {
+            res.render('errors', {
+                'errorMessage': "Unable to edit customer"
+            })
+        }
+
+    })
 
 }
 main();
