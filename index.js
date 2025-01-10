@@ -167,7 +167,6 @@ async function main() {
         });
     })
 
-    //create pnotes including customer names
     app.get('/pnotes', async function (req, res) {
         const [pnotes] = await connection.execute("SELECT * FROM Pnotes join Customers ON Pnotes.cust_id = Customers.cust_id where 1")
         console.log(pnotes);
@@ -175,14 +174,21 @@ async function main() {
             "allPnotes": pnotes,   
         });
     })
-
-    app.post('/pnotes/:pnote_id/update', async function(req, res){
-        const{ pstart_date, pend_date, invest_amt, maintanence_fee, cFirst_name, cLast_name } = req.body;
-        const query = `Update Pnotes set pstart_date, pend_date, invest_amt, maintanence_fee, cFirst_name,cLast_name where pnote_id= ?`
-        const bindings = [ pstart_date, pend_date, invest_amt, maintanence_fee, cFirst_name, cLast_name , req.params.pnote_id];
-        await connection.execute(query,bindings);
-        res.redirect('/showPnotes');
+    //create pnotes including customer names
+    app.get('/pnotes/:pnote_id/update', async function (req, res) {
+        const [customers] = await connection.execute("SELECT * FROM Customers")
+        const [pnotes] =await connection.execute(`select * from Pnotes where pnote_id =?`,
+        [req.params.pnote_id]
+    );
+    const pnote = pnotes[0];
+    console.log(pnotes)
+        res.render('editPnotes', {
+            pnote, 
+            customers
+        });
     })
+
+
 }
 main();
 

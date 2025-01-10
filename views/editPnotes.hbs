@@ -13,18 +13,19 @@
     </div>
     <div>
         <label>Invested Amount</label>
-        <input type="date" name="invest_amt" class="form-control" value="{{pnote.invest_amt}}" />
+        <input type="text" name="invest_amt" class="form-control" value="{{pnote.invest_amt}}" />
     </div>
     <div>
         <label>Maintanence Fee</label>
         <input type="text" name="maintanence_fee" class="form-control" value="{{pnote.maintanence_fee}}" />
     </div>
+    
     <div>
         <label>Customer First Name</label>
         <select name="cFirst_name" class="form-control">
             {{#each customers}}
-            <option value="{{this.cFirst_name}}" {{#eq this.cFirst_name ../Customers.cFirst_name}}selected{{/eq}}>
-                {{this.name}}</option>
+            <option value="{{this.cust_id}}" {{#eq this.cust_id ../customers.cust_id}}selected{{/eq}}>
+                {{this.cFirst_name}}</option>
             {{/each}}
         </select>
     </div>
@@ -32,8 +33,8 @@
         <label>Customer Last Name</label>
         <select name="cLast_name" class="form-control">
             {{#each customers}}
-            <option value="{{this.cLast_name}}" {{#eq this.cFirst_name ../Customers.cLast_name}}selected{{/eq}}>
-                {{this.name}}</option>
+            <option value="{{this.cust_id}}" {{#eq this.cust_id ../customers.cust_id}}selected{{/eq}}>
+                {{this.cLast_name}}</option>
             {{/each}}
         </select>
     </div>
