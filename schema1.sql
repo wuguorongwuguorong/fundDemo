@@ -39,6 +39,10 @@ CREATE TABLE Pnotes(
     pend_date DATE,
     invest_amt DECIMAL(10,2) NOT NULL,
     maintenance_fee DECIMAL(10,2) NOT NULL
+    FOREIGN KEY(cust_id) REFERENCES Customers(cust_id);
+    FOREIGN KEY (bank_id) REFERENCES Banks(bank_id);
+    FOREIGN KEY(divi_id)REFERENCES Dividends(divi_id);
+    FOREIGN KEY(agent_id)REFERENCES Agents(agent_id);
 );
 
 
@@ -51,6 +55,8 @@ CREATE TABLE Dividends(
 CREATE TABLE MonthlyComms(
     moncomms_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
     comms_base DECIMAL (10,2) NOT NULL
+    FOREIGN KEY(pnote_id) REFERENCES Pnotes(pnote_id);
+    FOREIGN KEY (agent_id) REFERENCES Agents(agent_id);
 );
 
 

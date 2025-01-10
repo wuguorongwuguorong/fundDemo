@@ -74,10 +74,10 @@ async function main() {
         const [customers] = await connection.execute("SELECT * FROM Customers")
         console.log(customers);
         res.render('customers', {
-            "allCustomers": customers,
-            
+            "allCustomers": customers,   
         });
     })
+
     //add new customers into database and display in a new page
     app.get('/customers/create', async function (req, res) {
         const [customers] = await connection.execute("SELECT * FROM Customers")
@@ -150,6 +150,7 @@ async function main() {
 
             res.redirect('/customers');
         } catch (e) {
+            console.log(e)
             res.render('errors', {
                 'errorMessage': "Unable to edit customer"
             })
@@ -162,6 +163,15 @@ async function main() {
         console.log(total);
         res.render('totalAum', {
             "totalSum": total[0],    
+        });
+    })
+
+    //create pnotes including customer names
+    app.get('/showPnotes', async function (req, res) {
+        const [pnotes] = await connection.execute("SELECT * FROM Pnotes join Customers ON Pnotes.cust_id = Customers.cust_id where 1")
+        console.log(pnotes);
+        res.render('showPnotes', {
+            "allPnotes": pnotes,   
         });
     })
 
