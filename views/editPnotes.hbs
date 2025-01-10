@@ -1,0 +1,48 @@
+{{#extends "base"}}
+
+{{#block "content"}}
+<h1>Edit Pnotes: {{pnote.pnote_id}}</h1>
+<form method="POST">
+    <div>
+        <label>Start Date</label>
+        <input type="date" name="pstart_date" class="form-control" value="{{pnote.pstart_date}}" />
+    </div>
+    <div>
+        <label>End Date</label>
+        <input type="date" name="pend_start" class="form-control" value="{{pnote.pend_date}}" />
+    </div>
+    <div>
+        <label>Invested Amount</label>
+        <input type="date" name="invest_amt" class="form-control" value="{{pnote.invest_amt}}" />
+    </div>
+    <div>
+        <label>Maintanence Fee</label>
+        <input type="text" name="maintanence_fee" class="form-control" value="{{pnote.maintanence_fee}}" />
+    </div>
+    <div>
+        <label>Customer First Name</label>
+        <select name="cFirst_name" class="form-control">
+            {{#each customers}}
+            <option value="{{this.cFirst_name}}" {{#eq this.cFirst_name ../Customers.cFirst_name}}selected{{/eq}}>
+                {{this.name}}</option>
+            {{/each}}
+        </select>
+    </div>
+    <div>
+        <label>Customer Last Name</label>
+        <select name="cLast_name" class="form-control">
+            {{#each customers}}
+            <option value="{{this.cLast_name}}" {{#eq this.cFirst_name ../Customers.cLast_name}}selected{{/eq}}>
+                {{this.name}}</option>
+            {{/each}}
+        </select>
+    </div>
+
+
+    {{!-- <button type="submit">Create</button> --}}
+    <input type="submit" value="Edit" class="btn btn-primary mt-3" />
+</form>
+
+{{/block}}
+
+{{/extends}}

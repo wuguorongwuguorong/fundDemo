@@ -3,6 +3,7 @@ const hbs = require('hbs');
 const waxOn = require('wax-on');
 require('dotenv').config();
 const { createConnection } = require('mysql2/promise');
+const { defaultConfiguration } = require('express/lib/application');
 
 
 let app = express();
@@ -167,7 +168,7 @@ async function main() {
     })
 
     //create pnotes including customer names
-    app.get('/showPnotes', async function (req, res) {
+    app.get('/pnotes', async function (req, res) {
         const [pnotes] = await connection.execute("SELECT * FROM Pnotes join Customers ON Pnotes.cust_id = Customers.cust_id where 1")
         console.log(pnotes);
         res.render('showPnotes', {
@@ -175,6 +176,13 @@ async function main() {
         });
     })
 
+    app.post('/pnotes/:pnote_id/update', async function(req, res){
+        const{ pstart_date, pend_date, invest_amt, maintanence_fee, cFirst_name, cLast_name } = req.body;
+        const query = `Update Pnotes set pstart_date, pend_date, invest_amt, maintanence_fee, cFirst_name,cLast_name where pnote_id= ?`
+        const bindings = [ pstart_date, pend_date, invest_amt, maintanence_fee, cFirst_name, cLast_name , req.params.pnote_id];
+        await connection.execute(query,bindings);
+        res.redirect('/showPnotes');
+    })
 }
 main();
 
