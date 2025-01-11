@@ -1,0 +1,56 @@
+{{#extends "base"}}
+
+{{#block "content"}}
+<h1>Create Pnotes</h1>
+
+<form method="POST">
+    <div>
+        <label>Start Date </label>
+        <input type="date" name="pstart_date" class="form-control" />
+    </div>
+    <div>
+        <label>Invested Amount</label>
+        <input type="text" name="invest_name" class="form-control" />
+    </div>
+    <div>
+        <label>Maintenance Fee</label>
+        <input type="text" name="maintenance_fee" class="form-control" />
+    </div>
+
+    {{!-- <div>
+        <label>Customer First Name</label>
+        <select name="cust_id" class="form-control">
+            {{#each customers}}
+            <option value="{{this.cust_id}}">{{this.cFirst_name}}</option>
+            {{/each}}
+        </select>
+    </div>
+
+    <div>
+        <label>Customer Last Name</label>
+        <select name="cust_id" class="form-control">
+            {{#each customers}}
+            <option value="{{this.cust_id}}">{{this.cLast_name}}</option>
+            {{/each}}
+        </select>
+    </div> --}}
+    <div>
+          <label for="cust_id">Customer:</label>
+      <select name="cust_id" class="form-control">
+        {{#each customers}}
+        <option value="{{this.cust_id}}">
+            {{this.cFirst_name}} {{this.cLast_name}}
+        </option>
+        {{/each}}
+    </select>
+    </div>
+
+
+
+    {{!-- <button type="submit">Create</button> --}}
+    <input type="submit" value="Create" class="btn btn-primary mt-3" />
+</form>
+
+{{/block}}
+
+{{/extends}}

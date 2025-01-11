@@ -174,7 +174,23 @@ async function main() {
             "allPnotes": pnotes,   
         });
     })
-    //create pnotes including customer names
+       //create pnotes including customer names
+      app.get('/pnotes/create', async function (req, res) {
+        const [customers] = await connection.execute("SELECT cust_id, cFirst_name, cLast_name FROM Customers")
+        console.log(customers);
+        res.render('create_pnotes', {
+            "customers": customers,
+        });
+    })
+
+    //Created amd post into database
+    app.post('/pnotes/create', async function(req,res){
+        const {pstart_date,invest_amt, maintenance_fee, cust_id} = req.body;
+        const query = "Insert into Pnotes (pstart_date, invest_amt, maintenance_fee, cust_id) values(?,?,?,?);"
+        const results = await connection.execute(query,[pstart_date, invest_amt, maintenance_fee, cust_id])
+        res.redirect('/pnotes');
+    })
+   //update Pnotes after creatation
     app.get('/pnotes/:pnote_id/update', async function (req, res) {
         const [customers] = await connection.execute("SELECT * FROM Customers")
         const [pnotes] =await connection.execute(`select * from Pnotes where pnote_id =?`,
@@ -190,9 +206,9 @@ async function main() {
 
     //After editing, post it back to All Pnotes
     app.post('/pnotes/:pnote_id/update', async function(req,res){
-        const {pstart_date, invest_amt, maintenance_fee, cFirst_name, cLast_name} = req.body;
-        const query = `UPDATE Pnotes SET pstart_date=?, invest_amt=?, maintenance_fee=?, cFirst_name=?, cLast_name=? WHERE pnote_id = ?`;
-        const bindings = [pstart_date, invest_amt, maintenance_fee, cFirst_name, cLast_name, req.params.pnote_id];
+        const {pstart_date,invest_amt, maintenance_fee, cFirst_name, cLast_name} = req.body;
+        const query = `UPDATE Pnotes SET Pnotes.pstart_date=?, Pnotes.invest_amt=?, Pnotes.maintenance_fee=?, Customers.cFirst_name=?, Customers.cLast_name=? WHERE pnote_id = ?`;
+        const bindings = [pstart_date, pstart_date, invest_amt, maintenance_fee, cFirst_name, cLast_name, req.params.pnote_id];
         await connection.execute(query, bindings);
         res.redirect('/pnotes');
     })

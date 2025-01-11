@@ -24,7 +24,7 @@
         <label>Customer First Name</label>
         <select name="cFirst_name" class="form-control">
             {{#each customers}}
-            <option value="{{this.cust_id}}" {{#eq this.cust_id ../customers.cust_id}}selected{{/eq}}>
+            <option value="{{this.cust_id}}" {{#eq this.cust_id ../customers.cFirst_name}}selected{{/eq}}>
                 {{this.cFirst_name}}</option>
             {{/each}}
         </select>
@@ -33,7 +33,7 @@
         <label>Customer Last Name</label>
         <select name="cLast_name" class="form-control">
             {{#each customers}}
-            <option value="{{this.cust_id}}" {{#eq this.cust_id ../customers.cust_id}}selected{{/eq}}>
+            <option value="{{this.cust_id}}" {{#eq this.cust_id ../customers.cLast_name}}selected{{/eq}}>
                 {{this.cLast_name}}</option>
             {{/each}}
         </select>
