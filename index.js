@@ -190,9 +190,9 @@ async function main() {
 
     //After editing, post it back to All Pnotes
     app.post('/pnotes/:pnote_id/update', async function(req,res){
-        const {pstart_date, invest_amt, maintanence_fee, cFirst_name, cLast_name} = req.body;
-        const query = `UPDATE Pnotes SET pstart_date=?, invest_amt=?, maintanence_fee=?, cFirst_name=? , cLast_name=? WHERE pnote_id = ?`;
-        const bindings = [pstart_date, invest_amt, maintanence_fee, cFirst_name, cLast_name, req.params.pnote_id];
+        const {pstart_date, invest_amt, maintenance_fee, cFirst_name, cLast_name} = req.body;
+        const query = `UPDATE Pnotes SET pstart_date=?, invest_amt=?, maintenance_fee=?, cFirst_name=?, cLast_name=? WHERE pnote_id = ?`;
+        const bindings = [pstart_date, invest_amt, maintenance_fee, cFirst_name, cLast_name, req.params.pnote_id];
         await connection.execute(query, bindings);
         res.redirect('/pnotes');
     })
