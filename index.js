@@ -4,6 +4,7 @@ const waxOn = require('wax-on');
 require('dotenv').config();
 const { createConnection } = require('mysql2/promise');
 const { defaultConfiguration } = require('express/lib/application');
+const excelJs = require('exceljs')
 
 
 let app = express();
@@ -34,6 +35,22 @@ async function main() {
         res.render('index');
 
     });
+    app.get('/export', async function (res,req){
+        try{
+
+            let workbook = new excelJs.workbook();
+
+            const sheet = workbook.addWorksSheet("Pnotes OverView");
+            sheet columns = [
+               { header : "Account Start Date", Key: "pstart_date", width: "30"},
+               { header : "Invested Amount", Key: "Invest_amt", width: "30"},
+               { header : "Maintanence", Key: "maintanence_fee", width: "30"},
+               { header : "Customer Name", Key: "cust_id", width: "30"}
+            ]
+        }catch{
+
+        }
+    })
 
     app.get('/overallView', async function (req, res) {
         let query = `SELECT Customers.cFirst_name, Customers.cLast_name, Customers.cEmail, Banks.bank_name, Pnotes.invest_amt, Pnotes.pstart_date, Agents.aFirst_name, Agents.aLast_name FROM Customers JOIN Pnotes ON Pnotes.cust_id = Customers.cust_id Join Agents ON Pnotes.agent_id = Agents.agent_id join Banks on Pnotes.bank_id = Banks.bank_id WHERE 1=1 `;
