@@ -50,20 +50,14 @@ async function main() {
             query += ` AND cLast_name LIKE ?`;
             bindings.push('%' + cLast_name + '%');
         }
-
         console.log("query", query);
-
-       
         // const [customers] = await connection.execute({
         //     'sql': query,
         //     'nestTables': true
         // }, bindings);
         
-
         const [customers] = await connection.execute(query,bindings);
-
         //let [customers] = await connection.execute('SELECT * FROM Customers Inner JOIN Pnotes ON Customers.cust_id = Pnotes.cust_id');
-
 
         res.render('overallView', {
             "allCustomers": customers,
@@ -186,32 +180,35 @@ async function main() {
     //Created amd post into database
     app.post('/pnotes/create', async function(req,res){
         const {pstart_date,invest_amt, maintenance_fee, cust_id} = req.body;
-        const query = "Insert into Pnotes (pstart_date, invest_amt, maintenance_fee, cust_id) values(?,?,?,?);"
-        const results = await connection.execute(query,[pstart_date, invest_amt, maintenance_fee, cust_id])
+        const query = `Insert into Pnotes (pstart_date, invest_amt, maintenance_fee, cust_id) values(?,?,?,?);`;
+    
+        await connection.execute(query,[pstart_date, invest_amt, maintenance_fee, cust_id])
         res.redirect('/pnotes');
+    
     })
-   //update Pnotes after creatation
-    app.get('/pnotes/:pnote_id/update', async function (req, res) {
-        const [customers] = await connection.execute("SELECT * FROM Customers")
-        const [pnotes] =await connection.execute(`select * from Pnotes where pnote_id =?`,
-        [req.params.pnote_id]
-    );
-    const pnote = pnotes[0];
-    console.log(pnotes)
-        res.render('editPnotes', {
-            pnote, 
-            customers
-        });
-    })    
 
-    //After editing, post it back to All Pnotes
-    app.post('/pnotes/:pnote_id/update', async function(req,res){
-        const {pstart_date,invest_amt, maintenance_fee, cFirst_name, cLast_name} = req.body;
-        const query = `UPDATE Pnotes SET Pnotes.pstart_date=?, Pnotes.invest_amt=?, Pnotes.maintenance_fee=?, Customers.cFirst_name=?, Customers.cLast_name=? WHERE pnote_id = ?`;
-        const bindings = [pstart_date, pstart_date, invest_amt, maintenance_fee, cFirst_name, cLast_name, req.params.pnote_id];
-        await connection.execute(query, bindings);
-        res.redirect('/pnotes');
-    })
+   //update Pnotes after creatation
+    // app.get('/pnotes/:pnote_id/update', async function (req, res) {
+    //     const [customers] = await connection.execute("SELECT * FROM Customers")
+    //     const [pnotes] =await connection.execute(`select * from Pnotes where pnote_id =?`,
+    //     [req.params.pnote_id]
+    // );
+    // const pnote = pnotes[0];
+    // console.log(pnotes)
+    //     res.render('editPnotes', {
+    //         pnote, 
+    //         customers
+    //     });
+    // })    
+
+    // //After editing, post it back to All Pnotes
+    // app.post('/pnotes/:pnote_id/update', async function(req,res){
+    //     const {pstart_date,invest_amt, maintenance_fee, cFirst_name, cLast_name} = req.body;
+    //     const query = `UPDATE Pnotes SET pstart_date=?, invest_amt=?, maintenance_fee=?, cFirst_name=?, cLast_name=? WHERE pnote_id = ?`;
+    //     const bindings = [pstart_date, pstart_date, invest_amt, maintenance_fee, cFirst_name, cLast_name, req.params.pnote_id];
+    //     await connection.execute(query, bindings);
+    //     res.redirect('/pnotes');
+    // })
 
 }
 

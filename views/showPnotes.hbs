@@ -25,8 +25,8 @@
         {{!-- <th>Account Closed Date</th> --}}
         <th>Invested Amount</th>
         <th>Maintanence Fee</th>
-        <th>Customer First Name</th>
-        <th>Customer Last Name</th>
+        <th>Customer Name</th>
+        {{!-- <th>Customer Last Name</th> --}}
     </tr>
     {{#each allPnotes}}
     <tr>
@@ -34,8 +34,8 @@
          {{!-- <td>{{this.pend_date}}</td> --}}
         <td>{{this.invest_amt}}</td>
         <td>{{this.maintenance_fee}}</td>
-        <td>{{this.cFirst_name}}</td>
-        <td>{{this.cLast_name}}</td>
+        <td>{{this.cFirst_name}}{{this.cLast_name}}</td>
+        
         <td>
             <a href="/pnotes/{{this.pnote_id}}/update" class="btn btn-primary btn-sm">Edit</a>
             <a href="/customers/{{this.cust_id}}/delete" class="btn btn-danger btn-sm">Delete</a>
