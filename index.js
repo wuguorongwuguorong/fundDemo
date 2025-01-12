@@ -162,6 +162,7 @@ async function main() {
     })
 
     app.get('/pnotes', async function (req, res) {
+        
         const [pnotes] = await connection.execute("SELECT * FROM Pnotes join Customers ON Pnotes.cust_id = Customers.cust_id where 1")
         console.log(pnotes);
         res.render('showPnotes', {
@@ -188,27 +189,29 @@ async function main() {
     })
 
    //update Pnotes after creatation
-    // app.get('/pnotes/:pnote_id/update', async function (req, res) {
-    //     const [customers] = await connection.execute("SELECT * FROM Customers")
-    //     const [pnotes] =await connection.execute(`select * from Pnotes where pnote_id =?`,
-    //     [req.params.pnote_id]
-    // );
-    // const pnote = pnotes[0];
-    // console.log(pnotes)
-    //     res.render('editPnotes', {
-    //         pnote, 
-    //         customers
-    //     });
-    // })    
+    app.get('/pnotes/:pnote_id/update', async function (req, res) {
+       
+        const [customers] = await connection.execute("SELECT * FROM Customers")
+        const [pnotes] =await connection.execute(`select * from Pnotes where pnote_id =?`,
+        [req.params.pnote_id]
+    );
+    const pnote = pnotes[0];
+    console.log(pnotes)
+        res.render('editPnotes', {
+            pnote, 
+            customers
+        });
+    })    
 
-    // //After editing, post it back to All Pnotes
-    // app.post('/pnotes/:pnote_id/update', async function(req,res){
-    //     const {pstart_date,invest_amt, maintenance_fee, cFirst_name, cLast_name} = req.body;
-    //     const query = `UPDATE Pnotes SET pstart_date=?, invest_amt=?, maintenance_fee=?, cFirst_name=?, cLast_name=? WHERE pnote_id = ?`;
-    //     const bindings = [pstart_date, pstart_date, invest_amt, maintenance_fee, cFirst_name, cLast_name, req.params.pnote_id];
-    //     await connection.execute(query, bindings);
-    //     res.redirect('/pnotes');
-    // })
+    //After editing, post it back to All Pnotes
+    app.post('/pnotes/:pnote_id/update', async function(req,res){
+   
+        const {pstart_date,invest_amt, maintenance_fee, cust_id} = req.body;
+        const query = `UPDATE Pnotes SET pstart_date=?, invest_amt=?, maintenance_fee=?, cust_id=? WHERE pnote_id = ?`;
+        const bindings = [pstart_date, invest_amt, maintenance_fee, cust_id, req.params.pnote_id];
+        await connection.execute(query, bindings);
+        res.redirect('/pnotes');
+    })
 
 }
 

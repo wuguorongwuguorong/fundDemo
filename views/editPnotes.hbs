@@ -19,22 +19,14 @@
         <label>Maintanence Fee</label>
         <input type="text" name="maintenance_fee" class="form-control" value="{{pnote.maintenance_fee}}" />
     </div>
-    
+
     <div>
-        <label>Customer First Name</label>
-        <select name="cFirst_name" class="form-control">
+        <label for="cust_id">Customer:</label>
+        <select name="cust_id" class="form-control">
             {{#each customers}}
-            <option value="{{this.cust_id}}" {{#eq this.cust_id ../customers.cFirst_name}}selected{{/eq}}>
-                {{this.cFirst_name}}</option>
-            {{/each}}
-        </select>
-    </div>
-    <div>
-        <label>Customer Last Name</label>
-        <select name="cLast_name" class="form-control">
-            {{#each customers}}
-            <option value="{{this.cust_id}}" {{#eq this.cust_id ../customers.cLast_name}}selected{{/eq}}>
-                {{this.cLast_name}}</option>
+            <option value="{{this.cust_id}}" {{#if (eq this.cust_id ../pnote.cust_id)}}selected{{/if}}>
+                {{this.cFirst_name}} {{this.cLast_name}}
+            </option>
             {{/each}}
         </select>
     </div>
