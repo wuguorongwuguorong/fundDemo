@@ -39,13 +39,13 @@ async function main() {
 
     app.get('/export', async (req, res) => {
         try {
-       
+
 
             // Query the data from the 'Overview' table
             const [rows, fields] = await connection.execute('SELECT Customers.cFirst_name, Customers.cLast_name, Customers.cEmail, Banks.bank_name, Pnotes.invest_amt, Pnotes.pstart_date, Agents.aFirst_name, Agents.aLast_name FROM Customers JOIN Pnotes ON Pnotes.cust_id = Customers.cust_id Join Agents ON Pnotes.agent_id = Agents.agent_id join Banks on Pnotes.bank_id = Banks.bank_id');
 
             // Create a heading for the Excel file
-            const heading = [["S/N", "First Name", "Last Name", "Bank", "Invested Amount","Inception Date", "Agent Name","Agent Name"]];
+            const heading = [["S/N", "First Name", "Last Name", "Bank", "Invested Amount", "Inception Date", "Agent Name", "Agent Name"]];
 
             // Convert the rows to a worksheet
             const worksheet = XLSX.utils.json_to_sheet(rows);
@@ -253,30 +253,25 @@ async function main() {
 
     //create a path to get values of agents comms
     app.get('/calculateComms', async function (req, res) {
-        let query = `Select sum(Pnotes.invest_amt * MonthlyComms.comms_base) AS total_comms_paid, sum(Pnotes.invest_amt) AS total_aum, Agents.aFirst_name ,Agents.aLast_name, Pnotes.pstart_date  from Pnotes Join Agents ON Agents.agent_id = Pnotes.agent_id Join MonthlyComms ON MonthlyComms.pnote_id = Pnotes.pnote_id group by Agents.aFirst_name, Agents.aLast_name, pStart_date`;
+        let query = `Select sum(Pnotes.invest_amt * MonthlyComms.comms_base) AS total_comms_paid, sum(Pnotes.invest_amt) AS total_aum, Agents.aFirst_name ,Agents.aLast_name, Pnotes.pstart_date  from Pnotes Join Agents ON Agents.agent_id = Pnotes.agent_id Join MonthlyComms ON MonthlyComms.pnote_id = Pnotes.pnote_id GROUP BY Agents.aFirst_name, Agents.aLast_name, Pnotes.pstart_date`;
 
-        //const bindings = [];
+        // const bindings = [];
 
-        // extract search terms
-        // const { cFirst_name, cLast_name } = req.query;
-        // if (cFirst_name) {
-        //     query += ` AND cFirst_name LIKE ?`;
-        //     bindings.push('%' + cFirst_name + '%')
+        //extract search terms
+        // const { startDate, endDate } = req.query;
+        // if (startDate) {
+
+        //     bindings.push(startDate);
         // }
-        // if (cLast_name) {
-        //     query += ` AND cLast_name LIKE ?`;
-        //     bindings.push('%' + cLast_name + '%');
+        // if (endDate) {
+
+        //     bindings.push(endDate);
         // }
-        // console.log("query", query);
-        // const [customers] = await connection.execute({
-        //     'sql': query,
-        //     'nestTables': true
-        // }, bindings);
 
         const [agentsComms] = await connection.execute(query);
-        //let [customers] = await connection.execute('SELECT * FROM Customers Inner JOIN Pnotes ON Customers.cust_id = Pnotes.cust_id');
+        console.log(query)
 
-        res.render('calComms', {
+        res.render('calculateComms', {
             "allComms": agentsComms,
             // "searchTerms": req.query
         })
