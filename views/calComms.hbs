@@ -1,0 +1,26 @@
+{{#extends "base"}}
+{{#block "content"}}
+
+<h2 class="mt-3">All Agent Commissions</h2>
+<table class="table">
+    <tr>
+        <th>Agent First Name</th>
+        <th>Agent Last Name</th>
+        <th>Total Accumaluated Assesst Under Management</th>
+        <th>Inception Date</th>
+        <th>Total Commissions</th>
+       
+    </tr>
+    {{#each allComms}}
+    <tr>
+        <td>{{this.aFirst_name}}</td>
+        <td>{{this.aLast_name}}</td>
+        <td>{{this.total_aum}}</td>
+        <td>{{this.pstart_date}}</td>
+        <td>{{this.total_comms_paid}}</td>
+   
+    </tr>
+    {{/each}}
+</table>
+{{/block}}
+{{/extends}}

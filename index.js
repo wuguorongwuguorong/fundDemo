@@ -251,6 +251,37 @@ async function main() {
         res.redirect('/pnotes');
     })
 
+    //create a path to get values of agents comms
+    app.get('/calculateComms', async function (req, res) {
+        let query = `Select sum(Pnotes.invest_amt * MonthlyComms.comms_base) AS total_comms_paid, sum(Pnotes.invest_amt) AS total_aum, Agents.aFirst_name ,Agents.aLast_name, Pnotes.pstart_date  from Pnotes Join Agents ON Agents.agent_id = Pnotes.agent_id Join MonthlyComms ON MonthlyComms.pnote_id = Pnotes.pnote_id group by Agents.aFirst_name, Agents.aLast_name, pStart_date`;
+
+        //const bindings = [];
+
+        // extract search terms
+        // const { cFirst_name, cLast_name } = req.query;
+        // if (cFirst_name) {
+        //     query += ` AND cFirst_name LIKE ?`;
+        //     bindings.push('%' + cFirst_name + '%')
+        // }
+        // if (cLast_name) {
+        //     query += ` AND cLast_name LIKE ?`;
+        //     bindings.push('%' + cLast_name + '%');
+        // }
+        // console.log("query", query);
+        // const [customers] = await connection.execute({
+        //     'sql': query,
+        //     'nestTables': true
+        // }, bindings);
+
+        const [agentsComms] = await connection.execute(query);
+        //let [customers] = await connection.execute('SELECT * FROM Customers Inner JOIN Pnotes ON Customers.cust_id = Pnotes.cust_id');
+
+        res.render('calComms', {
+            "allComms": agentsComms,
+            // "searchTerms": req.query
+        })
+    })
+
 }
 
 main();
