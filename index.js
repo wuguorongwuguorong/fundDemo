@@ -513,54 +513,108 @@ app.post('/pnotes/:id/edit', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-// GET /agents/commissions?rate=3&from=2025-01-01&to=2025-12-31
-// - rate: percent commission on invest_amt (default 3%)
-// - from/to: filter by pstart_date (inclusive)
-// GET /agents/commissions?agent_id=123
+// GET /agents/commissions?agent_id=1&from=2025-01-01&to=2025-12-31&rate=3
 app.get('/agents/commissions', async (req, res, next) => {
   try {
-    const agentId = req.query.agent_id?.trim() || '';
+    const agentId = (req.query.agent_id || '').trim();
+    const from = (req.query.from || '').trim();
+    const to   = (req.query.to   || '').trim();
+    const rate = isNaN(parseFloat(req.query.rate)) ? 3 : Math.max(0, parseFloat(req.query.rate));
 
     // dropdown options
     const [agents] = await connection.execute(`
-      SELECT agent_id, CONCAT(aFirst_name, ' ', aLast_name) AS full_name
+      SELECT agent_id, CONCAT(aFirst_name,' ',aLast_name) AS full_name
       FROM Agents
-      ORDER BY CASE WHEN agent_id = 1 THEN 0 ELSE 1 END, full_name
+      ORDER BY CASE WHEN agent_id=1 THEN 0 ELSE 1 END, full_name
     `);
 
     let rows = [];
-    let summary = { grand_total: 0 };
+    let summary = { grand_invest: 0, grand_commission: 0 };
 
-    if (agentId) {
-      // per-customer invested sum for the selected agent
+    if (agentId && from && to) {
       const [data] = await connection.execute(
         `
+        /* per-customer invested + commission with 15th rule and month-based proration */
         SELECT
           c.cust_id,
-          CONCAT(c.cFirst_name, ' ', c.cLast_name) AS customer_name,
-          ROUND(SUM(p.invest_amt), 2) AS total_invested
+          CONCAT(c.cFirst_name,' ',c.cLast_name) AS customer_name,
+          ROUND(SUM(p.invest_amt), 2) AS total_invested,
+          /* Sum commission across this agent's pnotes for the customer */
+          ROUND(SUM(
+            p.invest_amt * (?/100.0) *
+            (
+              /* months_in_period (inclusive) after applying 15th rule + pend_date */
+              GREATEST(0,
+                TIMESTAMPDIFF(
+                  MONTH,
+                  GREATEST(
+                    /* eligible start: if day<=14 use first of month, else first of next month */
+                    CASE
+                      WHEN DAY(p.pstart_date) <= 14
+                        THEN DATE_FORMAT(p.pstart_date, '%Y-%m-01')
+                      ELSE DATE_ADD(DATE_FORMAT(p.pstart_date, '%Y-%m-01'), INTERVAL 1 MONTH)
+                    END,
+                    DATE_FORMAT(?, '%Y-%m-01')     /* period start month */
+                  ),
+                  DATE_ADD(
+                    DATE_FORMAT(LEAST(COALESCE(p.pend_date, ?), ?), '%Y-%m-01'),
+                    INTERVAL 1 MONTH
+                  )
+                )
+              ) / 12.0
+            )
+          ), 2) AS commission
         FROM Pnotes p
         JOIN Customers c ON c.cust_id = p.cust_id
         WHERE p.agent_id = ?
         GROUP BY c.cust_id, customer_name
-        ORDER BY total_invested DESC, customer_name
+        ORDER BY commission DESC, customer_name
         `,
-        [agentId]
+        [rate, from, to, to, agentId]
       );
+
       rows = data;
 
-      // grand total for the agent
       const [tot] = await connection.execute(
-        `SELECT ROUND(SUM(invest_amt), 2) AS grand_total
-         FROM Pnotes WHERE agent_id = ?`,
-        [agentId]
+        `
+        SELECT
+          ROUND(SUM(p.invest_amt),2) AS grand_invest,
+          ROUND(SUM(
+            p.invest_amt * (?/100.0) *
+            GREATEST(0,
+              TIMESTAMPDIFF(
+                MONTH,
+                GREATEST(
+                  CASE
+                    WHEN DAY(p.pstart_date) <= 14
+                      THEN DATE_FORMAT(p.pstart_date, '%Y-%m-01')
+                    ELSE DATE_ADD(DATE_FORMAT(p.pstart_date, '%Y-%m-01'), INTERVAL 1 MONTH)
+                  END,
+                  DATE_FORMAT(?, '%Y-%m-01')
+                ),
+                DATE_ADD(
+                  DATE_FORMAT(LEAST(COALESCE(p.pend_date, ?), ?), '%Y-%m-01'),
+                  INTERVAL 1 MONTH
+                )
+              ) / 12.0
+            )
+          ),2) AS grand_commission
+        FROM Pnotes p
+        WHERE p.agent_id = ?
+        `,
+        [rate, from, to, to, agentId]
       );
-      summary.grand_total = tot[0].grand_total || 0;
+
+      summary = {
+        grand_invest: tot[0].grand_invest || 0,
+        grand_commission: tot[0].grand_commission || 0
+      };
     }
 
     res.render('agent_commissions', {
       agents,
       selectedAgentId: agentId,
+      filters: { from, to, rate },
       rows,
       summary
     });
@@ -570,8 +624,7 @@ app.get('/agents/commissions', async (req, res, next) => {
 });
 
 
-
-      //show total AUM and total unique customers
+//show total AUM and total unique customers
     app.get('/totalAum', async function (req, res) {
         const [total] = await connection.execute("SELECT SUM(p.invest_amt) AS Total_Invested_Amount,COUNT(DISTINCT c.cust_id) AS Unique_Customers FROM Customers c JOIN Pnotes p ON c.cust_id = p.cust_id;")
         console.log(total);
