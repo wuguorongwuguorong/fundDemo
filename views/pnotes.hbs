@@ -1,0 +1,41 @@
+{{#extends "base"}}
+
+{{#block "content"}}
+<h2 class="mt-3">Pnotes</h2>
+
+<a class="btn btn-primary mb-3" href="/pnotes/create">Create Pnote</a>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Pnote ID</th>
+      <th>Customer</th>
+      <th>Agent</th>
+      <th>Bank</th>
+      <th>Start</th>
+      <th>End</th>
+      <th>Invested</th>
+      <th>Maintenance</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each allPnotes}}
+    <tr>
+      <td>{{this.pnote_id}}</td>
+      <td>{{this.cFirst_name}} {{this.cLast_name}}</td>
+      <td>{{this.aFirst_name}} {{this.aLast_name}}</td>
+      <td>{{this.bank_name}}</td>
+      <td>{{this.pstart_date_fmt}}</td>
+      <td>{{this.pend_date_fmt}}</td>
+      <td>{{this.invest_amt}}</td>
+      <td>{{this.maintenance_fee}}</td>
+         <td>
+      <a class="btn btn-sm btn-warning" href="/pnotes/{{this.pnote_id}}/edit">Edit</a>
+    </td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
+{{/block}}
+
+{{/extends}}

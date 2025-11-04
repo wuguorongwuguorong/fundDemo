@@ -1,6 +1,15 @@
-CREATE DATABASE IF NOT EXISTS mgmtFundOverview;
+CREATE DATABASE IF NOT EXISTS mgmtFundoverview;
 
-USE mgmtFundOverview;
+USE mgmtFundoverview;
+
+CREATE TABLE IF NOT EXISTS Banks(
+    bank_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+    bank_name VARCHAR(255) NOT NULL, 
+    addr_1 VARCHAR(45) NOT NULL,
+    addr_2 VARCHAR(45) NOT NULL,
+    zipcode VARCHAR(10) NOT NULL,
+    swift_code VARCHAR(16) NOT NULL
+);
 
 CREATE TABLE IF NOT EXISTS Customers (
     cust_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
@@ -12,7 +21,10 @@ CREATE TABLE IF NOT EXISTS Customers (
     addr_1 VARCHAR(45) NOT NULL,
     addr_2 VARCHAR(45) NOT NULL,
     zipcode VARCHAR(10) NOT NULL,
-    cEmail VARCHAR(100) NOT NULL
+    cEmail VARCHAR(100) NOT NULL,
+    bank_num INT NOT NULL,
+    bank_id INT UNSIGNED NOT NULL,
+    FOREIGN KEY(bank_id) REFERENCES Banks(bank_id)
 );
 
 CREATE TABLE IF NOT EXISTS Agents(
@@ -23,21 +35,7 @@ CREATE TABLE IF NOT EXISTS Agents(
     join_date DATETIME NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS Banks(
-    bank_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-    bank_name VARCHAR(255) NOT NULL, 
-    bank_num INT NOT NULL,
-    addr_1 VARCHAR(45) NOT NULL,
-    addr_2 VARCHAR(45) NOT NULL,
-    zipcode VARCHAR(10) NOT NULL,
-    swift_code VARCHAR(16) NOT NULL
-);
 
-CREATE TABLE IF NOT EXISTS Dividends(
-    divi_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-    payout_date DATE,
-    nav_payout DECIMAL(10,2) NOT NULL
-);
 
 CREATE TABLE IF NOT EXISTS Pnotes(
     pnote_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
@@ -46,19 +44,15 @@ CREATE TABLE IF NOT EXISTS Pnotes(
     invest_amt DECIMAL(10,2) NOT NULL,
     maintenance_fee DECIMAL(10,2) NOT NULL,
     cust_id INT UNSIGNED NOT NULL,
-    bank_id INT UNSIGNED NOT NULL,
-    divi_id INT UNSIGNED NOT NULL,
     agent_id INT UNSIGNED NOT NULL,
     FOREIGN KEY(cust_id) REFERENCES Customers(cust_id),
-    FOREIGN KEY (bank_id) REFERENCES Banks(bank_id),
-    FOREIGN KEY(divi_id)REFERENCES Dividends(divi_id),
     FOREIGN KEY(agent_id)REFERENCES Agents(agent_id)
 );
 
 
 CREATE TABLE IF NOT EXISTS MonthlyComms(
     moncomms_id INT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-    comms_base DECIMAL (10,2) NOT NULL,
+    rate_percent DECIMAL(5,2) NOT NULL,
     pnote_id INT UNSIGNED NOT NULL,
     agent_id INT UNSIGNED NOT NULL,
     FOREIGN KEY(pnote_id) REFERENCES Pnotes(pnote_id),

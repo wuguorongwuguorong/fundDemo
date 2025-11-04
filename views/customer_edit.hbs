@@ -1,0 +1,74 @@
+{{#extends "base"}}
+
+{{#block "content"}}
+<h2 class="mt-3">Edit Customer</h2>
+
+<form method="POST" action="/customers/{{customer.cust_id}}/edit">
+  <div class="mb-2">
+    <label>First Name</label>
+    <input type="text" name="cFirst_name" class="form-control" value="{{customer.cFirst_name}}" required />
+  </div>
+
+  <div class="mb-2">
+    <label>Last Name</label>
+    <input type="text" name="cLast_name" class="form-control" value="{{customer.cLast_name}}" required />
+  </div>
+
+  <div class="mb-2">
+    <label>Date Of Birth</label>
+    <input type="date" name="dob" class="form-control" value="{{customer.dob_iso}}" required />
+  </div>
+
+  <div class="mb-2">
+    <label>NRIC</label>
+    <input type="text" name="NRIC" class="form-control" value="{{customer.NRIC}}" required />
+  </div>
+
+  <div class="mb-2">
+    <label>Gender</label>
+    <input type="text" name="gender" class="form-control" value="{{customer.gender}}" required />
+  </div>
+
+  <div class="mb-2">
+    <label>Address 1</label>
+    <input type="text" name="addr_1" class="form-control" value="{{customer.addr_1}}" required />
+  </div>
+
+  <div class="mb-2">
+    <label>Address 2</label>
+    <input type="text" name="addr_2" class="form-control" value="{{customer.addr_2}}" required />
+  </div>
+
+  <div class="mb-2">
+    <label>Zipcode</label>
+    <input type="text" name="zipcode" class="form-control" value="{{customer.zipcode}}" required />
+  </div>
+
+  <div class="mb-2">
+    <label>Email</label>
+    <input type="email" name="cEmail" class="form-control" value="{{customer.cEmail}}" required />
+  </div>
+
+  <div class="mb-2">
+    <label>Bank</label>
+    <select name="bank_id" class="form-control" required>
+      <option value="">-- Select a bank --</option>
+      {{#each banks}}
+        <option value="{{this.bank_id}}" {{#if (eq this.bank_id ../customer.bank_id)}}selected{{/if}}>
+          {{this.bank_name}}
+        </option>
+      {{/each}}
+    </select>
+  </div>
+
+  <div class="mb-2">
+    <label>Bank Account Number</label>
+    <input type="text" name="bank_num" class="form-control" value="{{customer.bank_num}}" required />
+  </div>
+
+  <button class="btn btn-primary mt-3" type="submit">Save</button>
+  <a class="btn btn-secondary mt-3" href="/customers">Cancel</a>
+</form>
+{{/block}}
+
+{{/extends}}

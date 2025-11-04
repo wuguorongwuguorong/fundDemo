@@ -1,0 +1,56 @@
+{{#extends "base"}}
+
+{{#block "content"}}
+<h2 class="mt-3">Agent Commission Calculation</h2>
+
+<form method="GET" class="row g-3 mb-3">
+  <div class="col-md-6">
+    <label class="form-label">Agent</label>
+    <select name="agent_id" class="form-control" required>
+      <option value="">-- Select Agent --</option>
+      {{#each agents}}
+        <option value="{{this.agent_id}}" {{#if (eq this.agent_id ../selectedAgentId)}}selected{{/if}}>
+          {{this.full_name}} (ID: {{this.agent_id}})
+        </option>
+      {{/each}}
+    </select>
+  </div>
+  <div class="col-md-6 d-flex align-items-end">
+    <button class="btn btn-primary me-2" type="submit">Show</button>
+    <a class="btn btn-secondary" href="/agents/commissions">Reset</a>
+  </div>
+</form>
+
+{{#if selectedAgentId}}
+  {{#if rows.length}}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Customer</th>
+          <th>Customer ID</th>
+          <th class="text-end">Total Invested</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each rows}}
+        <tr>
+          <td>{{this.customer_name}}</td>
+          <td>{{this.cust_id}}</td>
+          <td class="text-end">{{this.total_invested}}</td>
+        </tr>
+        {{/each}}
+      </tbody>
+      <tfoot>
+        <tr>
+          <th colspan="2" class="text-end">Grand Total</th>
+          <th class="text-end">{{../summary.grand_total}}</th>
+        </tr>
+      </tfoot>
+    </table>
+  {{else}}
+    <div class="alert alert-info">No Pnotes found for this agent.</div>
+  {{/if}}
+{{/if}}
+{{/block}}
+
+{{/extends}}

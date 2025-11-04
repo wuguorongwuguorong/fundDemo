@@ -1,0 +1,60 @@
+{{#extends "base"}}
+
+{{#block "content"}}
+<h2 class="mt-3">Agents</h2>
+
+<form method="POST" action="/agents/create" class="mb-4">
+  <div class="row g-3">
+    <div class="col-md-6">
+      <label class="form-label">First Name</label>
+      <input type="text" name="aFirst_name" class="form-control" required />
+    </div>
+    <div class="col-md-6">
+      <label class="form-label">Last Name</label>
+      <input type="text" name="aLast_name" class="form-control" required />
+    </div>
+    <div class="col-md-8">
+      <label class="form-label">Email</label>
+      <input type="email" name="aEmail" class="form-control" required />
+    </div>
+    <div class="col-md-4">
+      <label class="form-label">Join Date</label>
+      <input type="date" name="join_date" class="form-control" required />
+    </div>
+  </div>
+  <input type="submit" value="Add Agent" class="btn btn-primary mt-3" />
+</form>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Agent ID</th>
+      <th>First</th>
+      <th>Last</th>
+      <th>Email</th>
+      <th>Join Date</th>
+      <th style="width: 160px;">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each allAgents}}
+    <tr>
+      <td>{{this.agent_id}}</td>
+      <td>{{this.aFirst_name}}</td>
+      <td>{{this.aLast_name}}</td>
+      <td>{{this.aEmail}}</td>
+      <td>{{this.join_date_fmt}}</td>
+      <td>
+        <a href="/agents/{{this.agent_id}}/edit" class="btn btn-sm btn-warning">Edit</a>
+        <form method="POST" action="/agents/{{this.agent_id}}/delete" style="display:inline"
+              onsubmit="return confirm('Delete this agent? This cannot be undone.');">
+          <button class="btn btn-sm btn-danger" type="submit">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {{/each}}
+  </tbody>
+</table>
+
+{{/block}}
+{{/extends}}

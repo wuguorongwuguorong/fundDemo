@@ -21,6 +21,12 @@ const helpers = require('handlebars-helpers')({
     handlebars: hbs.handlebars
 });
 
+hbs.registerHelper('ddmmyyyy', function (date) {
+    return new Date(date).toLocaleDateString('en-GB'); // dd/mm/yyyy
+});
+
+hbs.registerHelper('eq', (a, b) => a == b);
+
 
 let connection;
 
@@ -73,6 +79,136 @@ async function main() {
         }
     });
 
+    app.get('/banks', async function (req, res) {
+        const [banks] = await connection.execute("SELECT * FROM Banks");
+        console.log(banks);
+        res.render('banks', {
+            allBanks: banks
+        });
+    });
+
+    app.get('/banks', async (req, res, next) => {
+        try {
+            const [banks] = await connection.execute('SELECT * FROM Banks ORDER BY bank_id DESC');
+            res.render('banks', { allBanks: banks });
+        } catch (err) { next(err); }
+    });
+
+    // Handle Create Bank
+    app.post('/banks/create', async (req, res, next) => {
+        try {
+            const { bank_name, addr_1, addr_2, zipcode, swift_code } = req.body;
+
+            // (optional) basic server-side guard
+            if (!bank_name || !addr_1 || !addr_2 || !zipcode || !swift_code) {
+                // You could render with an error message instead of redirecting
+                return res.redirect('/banks');
+            }
+
+            await connection.execute(
+                `INSERT INTO Banks (bank_name, addr_1, addr_2, zipcode, swift_code)
+       VALUES (?, ?, ?, ?, ?)`,
+                [bank_name, addr_1, addr_2, zipcode, swift_code]
+            );
+
+            res.redirect('/banks'); // refresh list
+        } catch (err) { next(err); }
+    });
+
+    // List Agents
+    app.get('/agents', async (req, res, next) => {
+        try {
+            const [agents] = await connection.execute(`
+      SELECT
+        agent_id,
+        aFirst_name,
+        aLast_name,
+        aEmail,
+        DATE_FORMAT(join_date, '%d/%m/%Y') AS join_date_fmt
+      FROM Agents
+      ORDER BY agent_id ASC
+    `);
+            res.render('agents', { allAgents: agents });
+        } catch (err) { next(err); }
+    });
+
+    // Create Agent
+    app.post('/agents/create', async (req, res, next) => {
+        try {
+            let { aFirst_name, aLast_name, aEmail, join_date } = req.body;
+
+            // Basic guard
+            if (!aFirst_name || !aLast_name || !aEmail || !join_date) {
+                return res.redirect('/agents');
+            }
+
+            // Convert HTML datetime-local ("YYYY-MM-DDTHH:MM") to MySQL DATETIME ("YYYY-MM-DD HH:MM:SS")
+            // Safe fallback if seconds are missing.
+            join_date = join_date.replace('T', ' ');
+            if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(join_date)) {
+                join_date = `${join_date}:00`;
+            }
+
+            await connection.execute(
+                `INSERT INTO Agents (aFirst_name, aLast_name, aEmail, join_date)
+       VALUES (?, ?, ?, ?)`,
+                [aFirst_name, aLast_name, aEmail, join_date]
+            );
+
+            res.redirect('/agents');
+        } catch (err) { next(err); }
+    });
+
+    app.get('/agents/:id/edit', async (req, res, next) => {
+        try {
+            const [rows] = await connection.execute(
+                `SELECT
+         agent_id, aFirst_name, aLast_name, aEmail,
+         DATE_FORMAT(join_date, '%Y-%m-%d') AS join_date_iso
+       FROM Agents
+       WHERE agent_id = ?`,
+                [req.params.id]
+            );
+            if (!rows.length) return res.status(404).send('Agent not found');
+            res.render('agent_edit', { agent: rows[0] });
+        } catch (err) { next(err); }
+    });
+
+    app.post('/agents/:id/edit', async (req, res, next) => {
+        try {
+            const { aFirst_name, aLast_name, aEmail, join_date } = req.body;
+
+            // join_date from <input type="date"> is YYYY-MM-DD — convert to DATETIME:
+            const joinDateTime = `${join_date} 00:00:00`;
+
+            await connection.execute(
+                `UPDATE Agents
+       SET aFirst_name = ?, aLast_name = ?, aEmail = ?, join_date = ?
+       WHERE agent_id = ?`,
+                [aFirst_name, aLast_name, aEmail, joinDateTime, req.params.id]
+            );
+
+            res.redirect('/agents');
+        } catch (err) { next(err); }
+    });
+
+    app.post('/agents/:id/delete', async (req, res, next) => {
+        try {
+            await connection.execute(`DELETE FROM Agents WHERE agent_id = ?`, [req.params.id]);
+            res.redirect('/agents');
+        } catch (err) {
+            // If there are Pnotes referencing this agent, FK will block deletion.
+            // MySQL error code for FK constraint is usually ER_ROW_IS_REFERENCED_2 (1451).
+            if (err && err.errno === 1451) {
+                // You can render a friendly message or redirect with a query flag.
+                console.error('Delete blocked by foreign key (Pnotes referencing this agent).');
+                return res.status(400).send('Cannot delete: agent is referenced by existing Pnotes.');
+            }
+            next(err);
+        }
+    });
+
+
     app.get('/overallView', async function (req, res) {
         let query = `SELECT Customers.cFirst_name, Customers.cLast_name, Customers.cEmail, Banks.bank_name, Pnotes.invest_amt, Pnotes.pstart_date, Agents.aFirst_name, Agents.aLast_name FROM Customers JOIN Pnotes ON Pnotes.cust_id = Customers.cust_id Join Agents ON Pnotes.agent_id = Agents.agent_id join Banks on Pnotes.bank_id = Banks.bank_id WHERE 1=1 `;
 
@@ -112,169 +248,336 @@ async function main() {
     })
 
     //add new customers into database and display in a new page
-    app.get('/customers/create', async function (req, res) {
-        const [customers] = await connection.execute("SELECT * FROM Customers")
-        console.log(customers);
-        res.render('create_customers', {
-            "allCustomers": customers,
+   app.get('/customers', async (req, res, next) => {
+  try {
+    const [rows] = await connection.execute(`
+      SELECT 
+        c.cust_id, c.cFirst_name, c.cLast_name, c.cEmail,
+        c.dob, c.NRIC, c.gender, c.addr_1, c.addr_2, c.zipcode,
+        c.bank_num, c.bank_id,
+        b.bank_name
+      FROM Customers c
+      LEFT JOIN Banks b ON b.bank_id = c.bank_id
+      ORDER BY c.cust_id ASC
+    `);
 
-        });
-    })
-    //add new customers into database and display
-    app.post('/customers/create', async function (req, res) {
-        const { cFirst_name, cLast_name, dob, NRIC, gender, addr_1, addr_2, zipcode, cEmail } = req.body;
-        const query = "INSERT INTO Customers(cFirst_name, cLast_name, dob, NRIC, gender, addr_1, addr_2, zipcode, cEmail) VALUES (? ,?, ?,?,?,?,?,?,?);"
-        const results = await connection.execute(query, [cFirst_name, cLast_name, dob, NRIC, gender, addr_1, addr_2, zipcode, cEmail]);
-        //res.send(results)
-        res.redirect('/customers');
-    })
+    res.render('customers', {
+      allCustomers: rows
+    });
+  } catch (err) {
+    next(err);
+  }
+});
 
-    //delete of customers
-    app.get('/customers/:customer_id/delete', async function (req, res) {
-        try {
-            const customer_id = req.params.customer_id;
+// Customers create (GET) – fetch Banks for the dropdown
+app.get('/customers/create', async (req, res, next) => {
+  try {
+    const [banks] = await connection.execute(
+      `SELECT bank_id, bank_name FROM Banks ORDER BY bank_name ASC`
+    );
 
-            const [customers] = await connection.execute("SELECT * FROM Customers WHERE cust_id = ?",
-                [customer_id]);
-            const customerToDelete = customers[0];
-            res.render("delete_customers", {
-                'customer': customerToDelete
-            })
+    res.render('customer_create', {
+      banks // pass to HBS to build <select>
+    });
+  } catch (err) {
+    next(err);
+  }
+});
 
-        } catch (e) {
-            res.json(404)
-        }
-    })
-    app.post('/customers/:customer_id/delete', async function (req, res) {
-        try {
-            const query = "DELETE FROM Customers where cust_id=?";
-            await connection.execute(query, [req.params.customer_id]);
-            //  res.render('successful_message',{
-            //    'happyMessage': 'customer deleted successfully'
-            //})
-            res.redirect('/customers');
-        } catch (e) {
-            res.render('error', {
-                'errorMessage': 'Unable to delete customer'
-            })
-        }
-    })
+app.post('/customers/create', async (req, res, next) => {
+  try {
+    const {
+      cFirst_name, cLast_name, dob, NRIC, gender,
+      addr_1, addr_2, zipcode, cEmail, bank_num, bank_id
+    } = req.body;
+
+    await connection.execute(
+      `INSERT INTO Customers
+       (cFirst_name, cLast_name, dob, NRIC, gender, addr_1, addr_2, zipcode, cEmail, bank_num, bank_id)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [cFirst_name, cLast_name, dob, NRIC, gender, addr_1, addr_2, zipcode, cEmail, bank_num, bank_id]
+    );
+
+    res.redirect('/customers');
+  } catch (err) {
+    next(err);
+  }
+});
+
 
     //update customers page
-    app.get('/customers/:customer_id/update', async function (req, res) {
-        const customer_id = req.params.customer_id;
-        const [customers] = await connection.execute("SELECT * FROM Customers WHERE cust_id = ?",
-            [customer_id])
-        const customer = customers[0];
-        res.render('edit_customers', {
-            customer,
+   app.get('/customers/:id/edit', async (req, res, next) => {
+  try {
+    const custId = req.params.id;
 
-        })
-    })
+    // fetch customer (dob formatted for <input type="date">)
+    const [custRows] = await connection.execute(`
+      SELECT 
+        cust_id, cFirst_name, cLast_name, 
+        DATE_FORMAT(dob, '%Y-%m-%d') AS dob_iso,
+        NRIC, gender, addr_1, addr_2, zipcode, cEmail,
+        bank_num, bank_id
+      FROM Customers
+      WHERE cust_id = ?
+    `, [custId]);
 
-    app.post('/customers/:customer_id/update', async function (req, res) {
-        try {
-            const { cFirst_name, cLast_name, dob, NRIC, gender, addr_1, addr_2, zipcode, cEmail } = req.body;
-            const query = `UPDATE Customers SET cFirst_name= ? , cLast_name = ?, dob =?,NRIC =?,gender =?,addr_1 =?,addr_2 =?,zipcode =?,cEmail =? WHERE cust_id =?`;
-            const bindings = [cFirst_name, cLast_name, dob, NRIC, gender, addr_1, addr_2, zipcode, cEmail, req.params.customer_id];
-            await connection.execute(query, bindings);
-            console.log('Request Body:', req.body);
-            console.log('Customer ID:', req.params.customer_id);
+    if (!custRows.length) return res.status(404).send('Customer not found');
 
-            res.redirect('/customers');
-        } catch (e) {
-            console.log(e)
-            res.render('errors', {
-                'errorMessage': "Unable to edit customer"
-            })
-        }
-    })
+    // fetch banks for dropdown
+    const [banks] = await connection.execute(`
+      SELECT bank_id, bank_name FROM Banks ORDER BY bank_name ASC
+    `);
 
-    //show total AUM and total unique customers
+    res.render('customer_edit', { customer: custRows[0], banks });
+  } catch (err) { next(err); }
+});
+
+    app.post('/customers/:id/edit', async (req, res, next) => {
+  try {
+    const custId = req.params.id;
+    const {
+      cFirst_name, cLast_name, dob, NRIC, gender,
+      addr_1, addr_2, zipcode, cEmail, bank_num, bank_id
+    } = req.body;
+
+    await connection.execute(`
+      UPDATE Customers
+      SET cFirst_name = ?, cLast_name = ?, dob = ?, NRIC = ?, gender = ?,
+          addr_1 = ?, addr_2 = ?, zipcode = ?, cEmail = ?, bank_num = ?, bank_id = ?
+      WHERE cust_id = ?
+    `, [
+      cFirst_name, cLast_name, dob, NRIC, gender,
+      addr_1, addr_2, zipcode, cEmail, bank_num, bank_id, custId
+    ]);
+
+    res.redirect('/customers');
+  } catch (err) { next(err); }
+});
+
+app.post('/customers/:id/delete', async (req, res, next) => {
+  try {
+    await connection.execute(`DELETE FROM Customers WHERE cust_id = ?`, [req.params.id]);
+    res.redirect('/customers');
+  } catch (err) {
+    // FK constraint error (row referenced by Pnotes)
+    if (err && err.errno === 1451) {
+      return res.status(400).send('Cannot delete: customer is referenced by existing Pnotes.');
+    }
+    next(err);
+  }
+});
+
+  
+
+    // List Pnotes with Customer, Agent, and Bank info
+app.get('/pnotes', async (req, res, next) => {
+  try {
+    const [pnotes] = await connection.execute(`
+      SELECT
+        p.pnote_id,
+        DATE_FORMAT(p.pstart_date, '%d/%m/%Y') AS pstart_date_fmt,
+        CASE WHEN p.pend_date IS NULL THEN '-' ELSE DATE_FORMAT(p.pend_date, '%d/%m/%Y') END AS pend_date_fmt,
+        p.invest_amt,
+        p.maintenance_fee,
+        c.cust_id, c.cFirst_name, c.cLast_name,
+        a.agent_id, a.aFirst_name, a.aLast_name,
+        b.bank_id, b.bank_name
+      FROM Pnotes p
+      JOIN Customers c ON c.cust_id = p.cust_id
+      JOIN Agents a    ON a.agent_id = p.agent_id
+      LEFT JOIN Banks b ON b.bank_id = c.bank_id
+      ORDER BY p.pnote_id DESC
+    `);
+
+    res.render('pnotes', { allPnotes: pnotes });
+  } catch (err) { next(err); }
+});
+
+// Show create form (needs customers & agents for dropdowns)
+app.get('/pnotes/create', async (req, res, next) => {
+  try {
+    const [customers] = await connection.execute(`
+      SELECT cust_id, CONCAT(cFirst_name, ' ', cLast_name) AS full_name FROM Customers ORDER BY full_name
+    `);
+    const [agents] = await connection.execute(`
+      SELECT agent_id, CONCAT(aFirst_name, ' ', aLast_name) AS full_name FROM Agents ORDER BY full_name
+    `);
+
+    res.render('pnote_create', { customers, agents });
+  } catch (err) { next(err); }
+});
+
+
+    //Created amd post into database
+  app.post('/pnotes/create', async (req, res, next) => {
+  try {
+    let { cust_id, agent_id, pstart_date, pend_date, invest_amt, maintenance_fee } = req.body;
+
+    // basic guards
+    if (!cust_id || !agent_id || !pstart_date || !invest_amt || !maintenance_fee) {
+      return res.status(400).send('Missing required fields');
+    }
+
+    // normalize pend_date to NULL if empty
+    pend_date = pend_date && pend_date.trim() !== '' ? pend_date : null;
+
+    const sql = `
+      INSERT INTO Pnotes
+        (pstart_date, pend_date, invest_amt, maintenance_fee, cust_id, agent_id)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `;
+
+    await connection.execute(sql, [
+      pstart_date, pend_date, invest_amt, maintenance_fee, cust_id, agent_id
+    ]);
+
+    res.redirect('/pnotes');
+  } catch (err) { next(err); }
+});
+
+
+    //update Pnotes after creatation
+    // GET: Edit Pnote
+app.get('/pnotes/:id/edit', async (req, res, next) => {
+  try {
+    const pnoteId = req.params.id;
+
+    // Load the pnote (format dates for <input type="date">)
+    const [pRows] = await connection.execute(`
+      SELECT
+        pnote_id,
+        DATE_FORMAT(pstart_date, '%Y-%m-%d') AS pstart_date_iso,
+        CASE WHEN pend_date IS NULL THEN NULL ELSE DATE_FORMAT(pend_date, '%Y-%m-%d') END AS pend_date_iso,
+        invest_amt,
+        maintenance_fee,
+        cust_id,
+        agent_id
+      FROM Pnotes
+      WHERE pnote_id = ?
+    `, [pnoteId]);
+
+    if (!pRows.length) return res.status(404).send('Pnote not found');
+    const pnote = pRows[0];
+
+    // Dropdowns
+    const [customers] = await connection.execute(`
+      SELECT cust_id, CONCAT(cFirst_name,' ',cLast_name) AS full_name
+      FROM Customers
+      ORDER BY full_name
+    `);
+    const [agents] = await connection.execute(`
+      SELECT agent_id, CONCAT(aFirst_name,' ',aLast_name) AS full_name
+      FROM Agents
+      ORDER BY full_name
+    `);
+
+    // Render your edit view (expects pnote, customers, agents)
+    res.render('pnote_edit', { pnote, customers, agents });
+  } catch (err) { next(err); }
+});
+
+// POST: Save Pnote edits
+app.post('/pnotes/:id/edit', async (req, res, next) => {
+  try {
+    const pnoteId = req.params.id;
+    let {
+      cust_id,
+      agent_id,
+      pstart_date,     // YYYY-MM-DD from <input type="date">
+      pend_date,       // optional
+      invest_amt,
+      maintenance_fee
+    } = req.body;
+
+    // basic validation
+    if (!cust_id || !agent_id || !pstart_date || !invest_amt || !maintenance_fee) {
+      return res.status(400).send('Missing required fields');
+    }
+
+    // normalize pend_date to NULL if empty
+    pend_date = pend_date && pend_date.trim() !== '' ? pend_date : null;
+
+    await connection.execute(`
+      UPDATE Pnotes
+      SET
+        pstart_date = ?,
+        pend_date = ?,
+        invest_amt = ?,
+        maintenance_fee = ?,
+        cust_id = ?,
+        agent_id = ?
+      WHERE pnote_id = ?
+    `, [pstart_date, pend_date, invest_amt, maintenance_fee, cust_id, agent_id, pnoteId]);
+
+    res.redirect('/pnotes');
+  } catch (err) { next(err); }
+});
+
+// GET /agents/commissions?rate=3&from=2025-01-01&to=2025-12-31
+// - rate: percent commission on invest_amt (default 3%)
+// - from/to: filter by pstart_date (inclusive)
+// GET /agents/commissions?agent_id=123
+app.get('/agents/commissions', async (req, res, next) => {
+  try {
+    const agentId = req.query.agent_id?.trim() || '';
+
+    // dropdown options
+    const [agents] = await connection.execute(`
+      SELECT agent_id, CONCAT(aFirst_name, ' ', aLast_name) AS full_name
+      FROM Agents
+      ORDER BY CASE WHEN agent_id = 1 THEN 0 ELSE 1 END, full_name
+    `);
+
+    let rows = [];
+    let summary = { grand_total: 0 };
+
+    if (agentId) {
+      // per-customer invested sum for the selected agent
+      const [data] = await connection.execute(
+        `
+        SELECT
+          c.cust_id,
+          CONCAT(c.cFirst_name, ' ', c.cLast_name) AS customer_name,
+          ROUND(SUM(p.invest_amt), 2) AS total_invested
+        FROM Pnotes p
+        JOIN Customers c ON c.cust_id = p.cust_id
+        WHERE p.agent_id = ?
+        GROUP BY c.cust_id, customer_name
+        ORDER BY total_invested DESC, customer_name
+        `,
+        [agentId]
+      );
+      rows = data;
+
+      // grand total for the agent
+      const [tot] = await connection.execute(
+        `SELECT ROUND(SUM(invest_amt), 2) AS grand_total
+         FROM Pnotes WHERE agent_id = ?`,
+        [agentId]
+      );
+      summary.grand_total = tot[0].grand_total || 0;
+    }
+
+    res.render('agent_commissions', {
+      agents,
+      selectedAgentId: agentId,
+      rows,
+      summary
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+
+
+      //show total AUM and total unique customers
     app.get('/totalAum', async function (req, res) {
         const [total] = await connection.execute("SELECT SUM(p.invest_amt) AS Total_Invested_Amount,COUNT(DISTINCT c.cust_id) AS Unique_Customers FROM Customers c JOIN Pnotes p ON c.cust_id = p.cust_id;")
         console.log(total);
         res.render('totalAum', {
             "totalSum": total[0],
         });
-    })
-
-    app.get('/pnotes', async function (req, res) {
-
-        const [pnotes] = await connection.execute("SELECT * FROM Pnotes join Customers ON Pnotes.cust_id = Customers.cust_id where 1")
-        console.log(pnotes);
-        res.render('showPnotes', {
-            "allPnotes": pnotes,
-        });
-    })
-    //create pnotes including customer names
-    app.get('/pnotes/create', async function (req, res) {
-        const [customers] = await connection.execute("SELECT cust_id, cFirst_name, cLast_name FROM Customers")
-        console.log(customers);
-        res.render('create_pnotes', {
-            "customers": customers,
-        });
-    })
-
-    //Created amd post into database
-    app.post('/pnotes/create', async function (req, res) {
-        const { pstart_date, invest_amt, maintenance_fee, cust_id } = req.body;
-        const query = `Insert into Pnotes (pstart_date, invest_amt, maintenance_fee, cust_id) values(?,?,?,?);`;
-
-        await connection.execute(query, [pstart_date, invest_amt, maintenance_fee, cust_id])
-        res.redirect('/pnotes');
-
-    })
-
-    //update Pnotes after creatation
-    app.get('/pnotes/:pnote_id/update', async function (req, res) {
-
-        const [customers] = await connection.execute("SELECT * FROM Customers")
-        const [pnotes] = await connection.execute(`select * from Pnotes where pnote_id =?`,
-            [req.params.pnote_id]
-        );
-        const pnote = pnotes[0];
-        console.log(pnotes)
-        res.render('editPnotes', {
-            pnote,
-            customers
-        });
-    })
-
-    //After editing, post it back to All Pnotes
-    app.post('/pnotes/:pnote_id/update', async function (req, res) {
-
-        const { pstart_date, invest_amt, maintenance_fee, cust_id } = req.body;
-        const query = `UPDATE Pnotes SET pstart_date=?, invest_amt=?, maintenance_fee=?, cust_id=? WHERE pnote_id = ?`;
-        const bindings = [pstart_date, invest_amt, maintenance_fee, cust_id, req.params.pnote_id];
-        await connection.execute(query, bindings);
-        res.redirect('/pnotes');
-    })
-
-    //create a path to get values of agents comms
-    app.get('/calculateComms', async function (req, res) {
-        let query = `Select sum(Pnotes.invest_amt * MonthlyComms.comms_base) AS total_comms_paid, sum(Pnotes.invest_amt) AS total_aum, Agents.aFirst_name ,Agents.aLast_name, Pnotes.pstart_date  from Pnotes Join Agents ON Agents.agent_id = Pnotes.agent_id Join MonthlyComms ON MonthlyComms.pnote_id = Pnotes.pnote_id GROUP BY Agents.aFirst_name, Agents.aLast_name, Pnotes.pstart_date`;
-
-        // const bindings = [];
-
-        //extract search terms
-        // const { startDate, endDate } = req.query;
-        // if (startDate) {
-
-        //     bindings.push(startDate);
-        // }
-        // if (endDate) {
-
-        //     bindings.push(endDate);
-        // }
-
-        const [agentsComms] = await connection.execute(query);
-        console.log(query)
-
-        res.render('calculateComms', {
-            "allComms": agentsComms,
-            // "searchTerms": req.query
-        })
     })
 
 }
