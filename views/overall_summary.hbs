@@ -1,0 +1,57 @@
+{{#extends "base"}}
+
+{{#block "content"}}
+<h2 class="mt-3">Overall Summary</h2>
+
+<div class="mb-3">
+  <a href="/export" class="btn btn-success">Download</a>
+</div>
+
+<form method="GET" class="row g-3 mb-3">
+  <div class="col-md-3">
+    <label class="form-label">Start Date</label>
+    <input type="date" name="from" class="form-control" value="{{filters.from}}" required />
+  </div>
+  <div class="col-md-3">
+    <label class="form-label">End Date</label>
+    <input type="date" name="to" class="form-control" value="{{filters.to}}" required />
+  </div>
+  <div class="col-md-6 d-flex align-items-end">
+    <button class="btn btn-primary me-2" type="submit">Apply</button>
+    <a class="btn btn-secondary" href="/overall/summary">Reset</a>
+  </div>
+</form>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Customer First Name</th>
+      <th>Customer Last Name</th>
+      <th>Agent First Name</th>
+      <th>Agent Last Name</th>
+      <th>Pnote IDs</th>
+      <th class="text-end">Total Invested</th>
+      <th class="text-end">Dividends (Period)</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#if rows.length}}
+      {{#each rows}}
+      <tr>
+        <td>{{this.cFirst_name}}</td>
+        <td>{{this.cLast_name}}</td>
+        <td>{{this.aFirst_name}}</td>
+        <td>{{this.aLast_name}}</td>
+        <td>{{this.pnote_ids}}</td>
+        <td class="text-end">{{this.total_invested}}</td>
+        <td class="text-end">{{this.dividends_amount}}</td>
+      </tr>
+      {{/each}}
+    {{else}}
+      <tr><td colspan="7"><em>No data for the selected period.</em></td></tr>
+    {{/if}}
+  </tbody>
+</table>
+{{/block}}
+
+{{/extends}}

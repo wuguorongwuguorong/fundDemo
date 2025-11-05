@@ -79,6 +79,85 @@ async function main() {
         }
     });
 
+    // Overall summary: per (customer, agent)
+// - Total Invested: sum of all pnotes' invest_amt (no date filter)
+// - Dividends: 1% per eligible month within [from,to],
+//   where eligible start = first of month if pstart<=14, else first of next month.
+app.get('/overall/summary', async (req, res, next) => {
+  try {
+    // default to current month if not provided
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const firstOfMonth = `${yyyy}-${mm}-01`;
+    // last day of current month:
+    const lastOfMonth = new Date(yyyy, today.getMonth() + 1, 0)
+      .toISOString().slice(0,10);
+
+    const from = (req.query.from || firstOfMonth).trim();
+    const to   = (req.query.to   || lastOfMonth).trim();
+
+    // Main aggregation: one row per (customer, agent)
+    const [rows] = await connection.execute(
+      `
+      SELECT
+        c.cust_id,
+        c.cFirst_name,
+        c.cLast_name,
+        a.agent_id,
+        a.aFirst_name,
+        a.aLast_name,
+        /* All pnotes for this customer-agent, as IDs */
+        GROUP_CONCAT(p.pnote_id ORDER BY p.pnote_id SEPARATOR ', ') AS pnote_ids,
+
+        /* Total invested across ALL pnotes for this customer-agent (no date filter) */
+        ROUND(SUM(p.invest_amt), 2) AS total_invested,
+
+        /* Dividends for the selected period (1% per eligible month) */
+        ROUND(SUM(
+          p.invest_amt * 0.01 *
+          GREATEST(0,
+            TIMESTAMPDIFF(
+              MONTH,
+              GREATEST(
+                /* 15th rule for eligible start */
+                CASE
+                  WHEN DAY(p.pstart_date) <= 14
+                    THEN DATE_FORMAT(p.pstart_date, '%Y-%m-01')
+                  ELSE DATE_ADD(DATE_FORMAT(p.pstart_date, '%Y-%m-01'), INTERVAL 1 MONTH)
+                END,
+                DATE_FORMAT(?, '%Y-%m-01')  /* period start aligned to month */
+              ),
+              DATE_ADD(
+                DATE_FORMAT(LEAST(COALESCE(p.pend_date, ?), ?), '%Y-%m-01'),
+                INTERVAL 1 MONTH
+              )
+            )
+          )
+        ), 2) AS dividends_amount
+
+      FROM Pnotes p
+      JOIN Customers c ON c.cust_id = p.cust_id
+      JOIN Agents    a ON a.agent_id = p.agent_id
+      GROUP BY
+        c.cust_id, c.cFirst_name, c.cLast_name,
+        a.agent_id, a.aFirst_name, a.aLast_name
+      ORDER BY
+        c.cLast_name, c.cFirst_name, a.aLast_name, a.aFirst_name
+      `,
+      [from, to, to]
+    );
+
+    res.render('overall_summary', {
+      rows,
+      filters: { from, to }
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+
     app.get('/banks', async function (req, res) {
         const [banks] = await connection.execute("SELECT * FROM Banks");
         console.log(banks);
